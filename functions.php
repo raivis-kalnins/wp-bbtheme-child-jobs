@@ -18,16 +18,62 @@ function wpbb_jobs_theme_color( $color, $stylesheet ) {
 }
 add_filter( 'wp_theme_project_theme_color', 'wpbb_jobs_theme_color', 20, 2 );
 
+function wpbb_jobs_enqueue_sector_assets() {
+    $version = wp_get_theme()->get( 'Version' );
+    wp_enqueue_style(
+        'wpbb-jobs-sector-base',
+        get_stylesheet_directory_uri() . '/assets/jobs-sector-base.css',
+        array(),
+        $version
+    );
+    wp_enqueue_script(
+        'wpbb-jobs-sector-base',
+        get_stylesheet_directory_uri() . '/assets/jobs-sector-base.js',
+        array(),
+        $version,
+        true
+    );
+    if ( function_exists( 'wp_theme_sector_customizer_css' ) ) {
+        wp_add_inline_style( 'wpbb-jobs-sector-base', wp_theme_sector_customizer_css( '#3155d9', '18px', '--sector-primary', '--sector-radius' ) );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'wpbb_jobs_enqueue_sector_assets', 30 );
+
 function wpbb_jobs_enqueue_assets() {
     $version = wp_get_theme()->get( 'Version' );
     wp_enqueue_style(
         'wpbb-jobs-portal',
         get_stylesheet_directory_uri() . '/assets/jobs-portal.css',
-        array(),
+        array( 'wpbb-jobs-sector-base' ),
         $version
     );
 }
 add_action( 'wp_enqueue_scripts', 'wpbb_jobs_enqueue_assets', 160 );
+
+function wpbb_jobs_dark_mode_bootstrap() {
+    echo '<script>(function(){try{var m=localStorage.getItem("wpThemeMode");if(m==="dark"){document.documentElement.classList.add("is-dark-theme");document.documentElement.setAttribute("data-theme","dark");}}catch(e){}})();</script>';
+}
+add_action( 'wp_head', 'wpbb_jobs_dark_mode_bootstrap', 1 );
+
+/**
+ * The parent orchestrator knows its historic non-store modes but predates the
+ * integrated Jobs mode. Stage the same explicit WooCommerce disable prompt
+ * when this HR theme is activated; never deactivate store plugins silently.
+ */
+function wpbb_jobs_stage_noncommerce_transition() {
+    if ( ! is_admin() || ! current_user_can( 'activate_plugins' ) ) return;
+    if ( ! function_exists( 'is_plugin_active' ) ) require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    $woo_active = is_plugin_active( 'woocommerce/woocommerce.php' );
+    $support_active = is_plugin_active( 'wp-theme-woo-support/wp-theme-woo-support.php' );
+    if ( $woo_active || $support_active ) {
+        set_transient( 'wp_theme_project_pending_transition', array(
+            'action' => 'disable',
+            'mode'   => 'jobs',
+            'theme'  => get_stylesheet(),
+        ), DAY_IN_SECONDS );
+    }
+}
+add_action( 'after_switch_theme', 'wpbb_jobs_stage_noncommerce_transition', 40 );
 
 function wpbb_jobs_enqueue_editor_assets() {
     $version = wp_get_theme()->get( 'Version' );

@@ -662,7 +662,7 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
             $clean = wpbb_child_v62_front_content( $profile );
             if ( $clean ) {
                 wp_update_post( array( 'ID' => $front, 'post_content' => $clean ) );
-                update_post_meta( $front, '_wpbb_child_bbuilder_version', '3.8.10.67' );
+                update_post_meta( $front, '_wpbb_child_bbuilder_version', wp_get_theme()->get( 'Version' ) );
                 clean_post_cache( $front );
             }
         }
@@ -681,7 +681,7 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
             if ( '' === trim( $content ) ) continue;
             $fixed = wpbb_child_v62_repair_serialized_content( $content );
             if ( $fixed !== $content ) wp_update_post( array( 'ID' => $page_id, 'post_content' => $fixed ) );
-            update_post_meta( $page_id, '_wpbb_child_bbuilder_version', '3.8.10.67' );
+            update_post_meta( $page_id, '_wpbb_child_bbuilder_version', wp_get_theme()->get( 'Version' ) );
         }
 
         update_option( $done_key, '3.8.10.67', false );
@@ -711,7 +711,7 @@ if ( ! function_exists( 'wpbb_child_v62_enqueue_system_css' ) ) {
     function wpbb_child_v62_enqueue_system_css() {
         $path = get_stylesheet_directory() . '/assets/theme-system-v62.css';
         if ( is_readable( $path ) ) {
-            wp_enqueue_style( 'wpbb-child-system-v62', get_stylesheet_directory_uri() . '/assets/theme-system-v62.css', array(), '3.8.10.67' );
+            wp_enqueue_style( 'wpbb-child-system-v62', get_stylesheet_directory_uri() . '/assets/theme-system-v62.css', array(), wp_get_theme()->get( 'Version' ) );
         }
     }
     add_action( 'wp_enqueue_scripts', 'wpbb_child_v62_enqueue_system_css', 140 );
@@ -722,7 +722,7 @@ if ( ! function_exists( 'wpbb_child_v65_enqueue_editor_css' ) ) {
     function wpbb_child_v65_enqueue_editor_css() {
         $path = get_stylesheet_directory() . '/assets/theme-system-editor-v65.css';
         if ( is_readable( $path ) ) {
-            wp_enqueue_style( 'wpbb-child-system-editor-v65', get_stylesheet_directory_uri() . '/assets/theme-system-editor-v65.css', array(), '3.8.10.66' );
+            wp_enqueue_style( 'wpbb-child-system-editor-v65', get_stylesheet_directory_uri() . '/assets/theme-system-editor-v65.css', array(), wp_get_theme()->get( 'Version' ) );
         }
     }
     add_action( 'enqueue_block_editor_assets', 'wpbb_child_v65_enqueue_editor_css', 140 );

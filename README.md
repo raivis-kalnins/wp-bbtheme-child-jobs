@@ -1,4 +1,4 @@
-# WP BBTheme Child Jobs 3.8.10.68
+# WP BBTheme Child Jobs 3.8.10.70
 
 A self-contained **HR / Jobs / recruitment** child theme for the WP BBTheme suite. The recruitment engine is integrated directly into the child theme, so **WP Job Portal is not required**.
 
@@ -6,11 +6,11 @@ A self-contained **HR / Jobs / recruitment** child theme for the WP BBTheme suit
 
 1. Install and activate the **WP BBTheme** parent theme.
 2. Install and activate **WP BBuilder 5.6.8 or newer**.
-3. Install and activate **WP BBTheme Child Jobs 3.8.10.68**.
+3. Install and activate **WP BBTheme Child Jobs 3.8.10.70**.
 4. Open **HR Jobs → Setup & Demo** (or **Appearance → HR Jobs Setup**).
-5. Click **Create / refresh Jobs pages**.
-6. Optionally click **Add / repair HR demo data** to seed employers, vacancies, candidate profiles and example application statuses.
-7. Use the parent theme Starter Setup / BBuilder Demo workflow for the rich HR landing pages, menus and sector imagery.
+5. Run the parent **Starter Setup / Import active child-theme demo**. The Jobs theme now automatically seeds the recruitment marketplace as part of the same import.
+6. Use **HR Jobs → Setup & Demo → Add / repair HR demo data** only when you want to repair/reseed the integrated recruitment records without rebuilding the whole site demo.
+7. If WooCommerce or WP Theme Woo Support is active, confirm the activation notice to disable that store stack for this non-commerce HR sector; no store data is deleted.
 8. Review **HR Jobs → Settings** and test the candidate and employer journeys on staging before launch.
 
 ## Integrated recruitment functionality
@@ -93,15 +93,17 @@ The engine uses ordinary WordPress posts, users, taxonomies and metadata instead
 
 ## Demo data
 
-The optional demo seeder creates realistic recruitment data without creating fake public user accounts:
+The Starter Setup import now creates a rich recruitment marketplace automatically without creating fake public login accounts:
 
-- six employer profiles;
-- twelve varied vacancies;
-- six candidate profiles across multiple disciplines;
-- example applications in several workflow states;
-- useful categories, job types and UK/remote locations.
+- **10 employer profiles** with locations, hiring contacts and company copy;
+- **20 varied vacancies** spanning technology, design, operations, finance, marketing, HR, customer success, compliance and project management;
+- featured, remote/hybrid, graduate, contract, part-time and permanent examples with salary ranges and deadlines;
+- **10 candidate profiles** across multiple disciplines with skills and availability;
+- **8+ example applications** spread across New, Reviewing, Shortlisted, Interview, Offer, Hired, Rejected and Withdrawn states;
+- job categories, job types, UK/remote locations and a useful skills taxonomy;
+- the HR sector’s career/hiring advice posts and bundled imagery through the normal parent demo importer.
 
-Existing matching sample records are not duplicated when the repair action is run again.
+The repair action is idempotent: matching sample records are updated/repaired rather than duplicated.
 
 ## Important portability note
 
@@ -112,3 +114,8 @@ For a site where recruitment data must remain independent of the active theme, a
 ## Scope
 
 This release implements the core careers / ATS / job-marketplace workflow directly in the theme. It does **not** copy commercial/premium add-ons from WP Job Portal such as paid credit packages, external AI services, premium messaging, PDF generation or payment add-ons.
+
+
+## 3.8.10.70 update
+
+- Refreshes the theme screenshot so the HR / Jobs preview matches the shared WP Base sector-card style used by the other child themes in **Appearance → Themes**.

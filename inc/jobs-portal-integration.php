@@ -162,6 +162,17 @@ add_action( 'wp_theme_seed_sector_pages', 'wpbb_jobs_create_portal_pages', 20 );
 
 function wpbb_jobs_demo_import_message( $message, $profile ) {
     if ( ( $profile['id'] ?? '' ) !== 'jobs' ) return $message;
-    return __( 'TalentBridge Jobs starter refreshed: BBuilder/Gutenberg sector pages, integrated Jobs pages and navigation are assigned. Existing unmanaged pages remain untouched. Use HR Jobs → Setup & Demo to add sample employers and vacancies.', 'wp-bbtheme-child' );
+    return __( 'TalentBridge Jobs starter refreshed: BBuilder/Gutenberg sector pages, integrated Jobs pages, navigation and rich recruitment demo data are assigned. Employers, vacancies, candidate profiles and example application workflow states are repaired automatically; existing unmanaged pages remain untouched.', 'wp-bbtheme-child' );
 }
 add_filter( 'wp_theme_demo_import_message', 'wpbb_jobs_demo_import_message', 20, 2 );
+
+
+/** Automatically populate the integrated recruitment marketplace during Starter Setup. */
+function wpbb_jobs_seed_demo_after_starter_import( $page_id, $profile ) {
+    unset( $page_id );
+    if ( ( $profile['id'] ?? '' ) !== 'jobs' ) return;
+    $result = wpbb_jobs_seed_rich_demo_data();
+    update_option( 'wpbb_jobs_demo_seed_summary', $result, false );
+    update_option( 'wpbb_jobs_demo_seeded_at', current_time( 'mysql' ), false );
+}
+add_action( 'wp_theme_after_demo_import', 'wpbb_jobs_seed_demo_after_starter_import', 60, 2 );

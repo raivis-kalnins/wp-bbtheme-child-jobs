@@ -1,6 +1,10 @@
 # Changelog
 
-## 3.8.10.68
+## 3.8.10.70
+
+- Replaces the distinct TalentBridge-style theme screenshot with the shared WP Base sector preview-card layout so the Jobs theme visually matches the rest of the suite in wp-admin.
+
+3.8.10.68
 - Removed the WP Job Portal dependency completely.
 - Added an integrated WordPress-native recruitment engine to the HR / Jobs child theme.
 - Added Jobs, Companies, Candidate Profiles and Applications content types plus job categories, job types, locations and skills.

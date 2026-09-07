@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const WPBB_JOBS_VERSION = '3.8.10.68';
+const WPBB_JOBS_VERSION = '3.8.10.70';
 
 function wpbb_jobs_settings() {
     $defaults = array(
@@ -883,6 +883,198 @@ function wpbb_jobs_seed_sample_data() {
     }
 
     return array( 'companies' => count( $company_ids ), 'jobs_created' => $created, 'resumes' => count( $resume_ids ), 'applications_created' => $application_created );
+}
+
+
+/**
+ * Extend the basic sample set into a richer recruitment marketplace.
+ * Safe to run repeatedly: records are repaired by title and application pair.
+ */
+function wpbb_jobs_seed_rich_demo_data() {
+    $base = wpbb_jobs_seed_sample_data();
+    wpbb_jobs_seed_default_terms();
+
+    $admin = get_users( array( 'role__in' => array( 'administrator' ), 'number' => 1, 'fields' => 'ID' ) );
+    $author = $admin ? (int) $admin[0] : get_current_user_id();
+
+    $extra_terms = array(
+        'wpbb_job_location' => array( 'Leeds', 'Cambridge', 'Cardiff', 'Glasgow' ),
+        'wpbb_job_category' => array( 'Data & Analytics', 'Project Management', 'Legal & Compliance' ),
+        'wpbb_job_skill' => array( 'Product strategy', 'Figma', 'React', 'TypeScript', 'Accessibility', 'SQL', 'Power BI', 'Stakeholder management', 'Recruitment', 'Employee relations', 'SEO', 'Content strategy', 'Forecasting', 'Commercial finance', 'Project delivery', 'Customer research' ),
+    );
+    foreach ( $extra_terms as $taxonomy => $names ) {
+        foreach ( $names as $name ) if ( ! term_exists( $name, $taxonomy ) ) wp_insert_term( $name, $taxonomy );
+    }
+
+    $companies = array(
+        array( 'BrightPath Learning', 'Education technology company helping organisations deliver practical learning at scale.', 'Cambridge', 'https://example.com/brightpath', 'talent@brightpath.example', '+44 1223 555 014' ),
+        array( 'Mosaic Retail', 'Omnichannel retail group combining ecommerce, stores and customer experience teams.', 'Leeds', 'https://example.com/mosaic-retail', 'careers@mosaic.example', '+44 113 555 0118' ),
+        array( 'Kite Financial', 'Digital financial-services business focused on transparent products and responsible growth.', 'Cardiff', 'https://example.com/kite-financial', 'people@kitefinancial.example', '+44 29 2055 0188' ),
+        array( 'BluePeak Systems', 'B2B software company building operational tools for distributed teams.', 'Glasgow', 'https://example.com/bluepeak', 'jobs@bluepeak.example', '+44 141 555 0192' ),
+    );
+    $company_ids = array();
+    foreach ( $companies as $item ) {
+        $existing = get_posts( array( 'post_type' => 'wpbb_company', 'post_status' => 'any', 'title' => $item[0], 'posts_per_page' => 1, 'fields' => 'ids' ) );
+        $company_id = $existing ? (int) $existing[0] : wp_insert_post( array(
+            'post_type' => 'wpbb_company', 'post_status' => 'publish', 'post_title' => $item[0], 'post_excerpt' => $item[1],
+            'post_content' => '<h2>' . esc_html__( 'About the employer', 'wp-bbtheme-child' ) . '</h2><p>' . esc_html( $item[1] ) . '</p><h2>' . esc_html__( 'Why people join', 'wp-bbtheme-child' ) . '</h2><p>' . esc_html__( 'Clear roles, supportive teams, flexible ways of working and practical development opportunities are central to this demonstration employer profile.', 'wp-bbtheme-child' ) . '</p>',
+            'post_author' => $author,
+        ) );
+        if ( ! $company_id || is_wp_error( $company_id ) ) continue;
+        update_post_meta( $company_id, '_wpbb_jobs_sample', 1 );
+        update_post_meta( $company_id, '_wpbb_company_website', $item[3] );
+        update_post_meta( $company_id, '_wpbb_company_email', $item[4] );
+        update_post_meta( $company_id, '_wpbb_company_phone', $item[5] );
+        update_post_meta( $company_id, '_wp_theme_demo_profile', 'jobs' );
+        $term = get_term_by( 'name', $item[2], 'wpbb_job_location' );
+        if ( $term ) wp_set_object_terms( $company_id, array( $term->term_id ), 'wpbb_job_location', false );
+        $company_ids[ $item[0] ] = $company_id;
+    }
+
+    // Repair contact data on the original six sample employers too.
+    $original_companies = array(
+        'Northstar Digital' => array( 'careers@northstar.example', '+44 20 7946 0201' ),
+        'Greenline Energy'  => array( 'jobs@greenline.example', '+44 117 555 0142' ),
+        'Harbour Health'    => array( 'people@harbourhealth.example', '+44 161 555 0159' ),
+        'Studio Forty Two'  => array( 'hello@studio42.example', '+44 20 7946 0236' ),
+        'Atlas Logistics'   => array( 'recruitment@atlaslogistics.example', '+44 121 555 0181' ),
+        'CivicWorks'        => array( 'talent@civicworks.example', '+44 131 555 0175' ),
+    );
+    foreach ( $original_companies as $name => $contact ) {
+        $ids = get_posts( array( 'post_type' => 'wpbb_company', 'post_status' => 'any', 'title' => $name, 'posts_per_page' => 1, 'fields' => 'ids' ) );
+        if ( $ids ) {
+            update_post_meta( (int) $ids[0], '_wpbb_company_email', $contact[0] );
+            update_post_meta( (int) $ids[0], '_wpbb_company_phone', $contact[1] );
+            update_post_meta( (int) $ids[0], '_wp_theme_demo_profile', 'jobs' );
+        }
+    }
+
+    $jobs = array(
+        array( 'Learning Experience Designer', 'BrightPath Learning', 'Design', 'Full time', 'Cambridge', 43000, 52000, true, true, array( 'Customer research', 'Figma', 'Stakeholder management' ), 'Shape practical digital learning experiences with product, content and customer teams.' ),
+        array( 'Customer Success Manager', 'BrightPath Learning', 'Customer Success', 'Full time', 'Remote', 42000, 50000, true, false, array( 'Stakeholder management', 'Customer research' ), 'Help organisations launch learning programmes, measure adoption and turn feedback into useful improvements.' ),
+        array( 'Ecommerce Trading Manager', 'Mosaic Retail', 'Marketing', 'Full time', 'Leeds', 46000, 56000, false, true, array( 'Content strategy', 'SQL', 'Stakeholder management' ), 'Own trading priorities across campaigns, merchandising and customer journeys for a growing retail platform.' ),
+        array( 'UX Researcher', 'Mosaic Retail', 'Design', 'Contract', 'Remote', 50000, 62000, true, false, array( 'Customer research', 'Figma', 'Stakeholder management' ), 'Plan and run customer research that improves online and in-store shopping journeys.' ),
+        array( 'Compliance Analyst', 'Kite Financial', 'Legal & Compliance', 'Full time', 'Cardiff', 39000, 47000, false, false, array( 'Stakeholder management', 'Project delivery' ), 'Support monitoring, policy updates and practical compliance guidance across a digital financial-services business.' ),
+        array( 'Commercial Finance Analyst', 'Kite Financial', 'Finance', 'Graduate', 'Cardiff', 30000, 35000, true, false, array( 'Forecasting', 'Commercial finance', 'Power BI' ), 'Build useful management information and support commercial decisions across product and operations teams.' ),
+        array( 'Senior React Engineer', 'BluePeak Systems', 'Technology', 'Full time', 'Remote', 68000, 82000, true, true, array( 'React', 'TypeScript', 'Accessibility' ), 'Build accessible product interfaces and reusable component systems for operational software used by distributed teams.' ),
+        array( 'Product Operations Manager', 'BluePeak Systems', 'Project Management', 'Full time', 'Glasgow', 52000, 64000, true, false, array( 'Product strategy', 'Project delivery', 'Stakeholder management' ), 'Improve planning, release coordination and feedback loops across product, engineering and customer teams.' ),
+    );
+    $new_jobs = 0;
+    foreach ( $jobs as $index => $item ) {
+        $existing = get_posts( array( 'post_type' => 'wpbb_job', 'post_status' => 'any', 'title' => $item[0], 'posts_per_page' => 1, 'fields' => 'ids' ) );
+        $job_id = $existing ? (int) $existing[0] : wp_insert_post( array(
+            'post_type' => 'wpbb_job', 'post_status' => 'publish', 'post_title' => $item[0], 'post_author' => $author,
+            'post_excerpt' => $item[10],
+            'post_date' => wp_date( 'Y-m-d H:i:s', strtotime( '-' . ( $index + 1 ) . ' days' ) ),
+            'post_content' => '<h2>' . esc_html__( 'The opportunity', 'wp-bbtheme-child' ) . '</h2><p>' . esc_html( $item[10] ) . '</p><h2>' . esc_html__( 'What you will do', 'wp-bbtheme-child' ) . '</h2><ul><li>' . esc_html__( 'Take ownership of useful, well-scoped work and communicate progress clearly.', 'wp-bbtheme-child' ) . '</li><li>' . esc_html__( 'Collaborate across disciplines and turn evidence into practical decisions.', 'wp-bbtheme-child' ) . '</li><li>' . esc_html__( 'Improve the way the team works as well as the work it delivers.', 'wp-bbtheme-child' ) . '</li></ul><h2>' . esc_html__( 'What is on offer', 'wp-bbtheme-child' ) . '</h2><p>' . esc_html__( 'A transparent salary range, supportive onboarding, flexible working options where the role allows it and a clear development conversation from the start.', 'wp-bbtheme-child' ) . '</p>',
+        ) );
+        if ( ! $job_id || is_wp_error( $job_id ) ) continue;
+        if ( ! $existing ) $new_jobs++;
+        $all_companies = get_posts( array( 'post_type' => 'wpbb_company', 'post_status' => 'publish', 'title' => $item[1], 'posts_per_page' => 1, 'fields' => 'ids' ) );
+        update_post_meta( $job_id, '_wpbb_jobs_sample', 1 );
+        update_post_meta( $job_id, '_wp_theme_demo_profile', 'jobs' );
+        update_post_meta( $job_id, '_wpbb_job_company_id', $all_companies ? (int) $all_companies[0] : 0 );
+        update_post_meta( $job_id, '_wpbb_job_salary_min', $item[5] );
+        update_post_meta( $job_id, '_wpbb_job_salary_max', $item[6] );
+        update_post_meta( $job_id, '_wpbb_job_currency', 'GBP' );
+        update_post_meta( $job_id, '_wpbb_job_remote', $item[7] ? 1 : 0 );
+        update_post_meta( $job_id, '_wpbb_job_featured', $item[8] ? 1 : 0 );
+        update_post_meta( $job_id, '_wpbb_job_status', 'open' );
+        update_post_meta( $job_id, '_wpbb_job_deadline', wp_date( 'Y-m-d', strtotime( '+' . ( 24 + $index * 3 ) . ' days' ) ) );
+        foreach ( array( 'wpbb_job_category' => $item[2], 'wpbb_job_type' => $item[3], 'wpbb_job_location' => $item[4] ) as $taxonomy => $name ) {
+            $term = get_term_by( 'name', $name, $taxonomy );
+            if ( $term ) wp_set_object_terms( $job_id, array( $term->term_id ), $taxonomy, false );
+        }
+        wp_set_object_terms( $job_id, $item[9], 'wpbb_job_skill', false );
+    }
+
+    // Make a balanced set of original vacancies featured and skill-rich too.
+    $repairs = array(
+        'Senior Product Designer' => array( true, array( 'Figma', 'Customer research', 'Product strategy' ) ),
+        'Frontend Engineer' => array( true, array( 'React', 'TypeScript', 'Accessibility' ) ),
+        'People Partner' => array( true, array( 'Employee relations', 'Stakeholder management', 'Recruitment' ) ),
+        'Data Analyst' => array( false, array( 'SQL', 'Power BI', 'Stakeholder management' ) ),
+        'Finance Business Partner' => array( false, array( 'Forecasting', 'Commercial finance', 'Stakeholder management' ) ),
+        'Content Marketing Manager' => array( false, array( 'SEO', 'Content strategy', 'Stakeholder management' ) ),
+    );
+    foreach ( $repairs as $title => $data ) {
+        $ids = get_posts( array( 'post_type' => 'wpbb_job', 'post_status' => 'any', 'title' => $title, 'posts_per_page' => 1, 'fields' => 'ids' ) );
+        if ( $ids ) {
+            update_post_meta( (int) $ids[0], '_wpbb_job_featured', $data[0] ? 1 : 0 );
+            update_post_meta( (int) $ids[0], '_wp_theme_demo_profile', 'jobs' );
+            wp_set_object_terms( (int) $ids[0], $data[1], 'wpbb_job_skill', false );
+        }
+    }
+
+    $candidates = array(
+        array( 'Maya Thompson', 'Senior Customer Success Manager', 'Customer Success', 'Leeds', array( 'Stakeholder management', 'Customer research' ), 'Customer success leader experienced in onboarding complex accounts, improving adoption and turning customer insight into product priorities.' ),
+        array( 'Oliver Bennett', 'React & TypeScript Engineer', 'Technology', 'Glasgow', array( 'React', 'TypeScript', 'Accessibility' ), 'Frontend engineer building accessible interfaces, component libraries and reliable product experiences for B2B software teams.' ),
+        array( 'Aisha Rahman', 'Compliance & Risk Analyst', 'Legal & Compliance', 'Cardiff', array( 'Stakeholder management', 'Project delivery' ), 'Compliance analyst with experience translating policy and regulatory requirements into practical operational controls.' ),
+        array( 'Lucas Evans', 'Product Operations Manager', 'Project Management', 'Remote', array( 'Product strategy', 'Project delivery', 'Stakeholder management' ), 'Product operations specialist improving planning, release rhythms, reporting and cross-team decision making.' ),
+    );
+    $candidate_ids = array();
+    foreach ( $candidates as $item ) {
+        $existing = get_posts( array( 'post_type' => 'wpbb_resume', 'post_status' => 'any', 'title' => $item[0], 'posts_per_page' => 1, 'fields' => 'ids' ) );
+        $resume_id = $existing ? (int) $existing[0] : wp_insert_post( array(
+            'post_type' => 'wpbb_resume', 'post_status' => 'publish', 'post_title' => $item[0], 'post_author' => $author,
+            'post_excerpt' => $item[1], 'post_content' => '<p>' . esc_html( $item[5] ) . '</p>',
+        ) );
+        if ( ! $resume_id || is_wp_error( $resume_id ) ) continue;
+        update_post_meta( $resume_id, '_wpbb_jobs_sample', 1 );
+        update_post_meta( $resume_id, '_wp_theme_demo_profile', 'jobs' );
+        update_post_meta( $resume_id, '_wpbb_resume_headline', $item[1] );
+        update_post_meta( $resume_id, '_wpbb_resume_availability', __( 'Open to suitable permanent or contract opportunities', 'wp-bbtheme-child' ) );
+        update_post_meta( $resume_id, '_wpbb_resume_visibility', 'employers' );
+        foreach ( array( 'wpbb_job_category' => $item[2], 'wpbb_job_location' => $item[3] ) as $taxonomy => $name ) {
+            $term = get_term_by( 'name', $name, $taxonomy );
+            if ( $term ) wp_set_object_terms( $resume_id, array( $term->term_id ), $taxonomy, false );
+        }
+        wp_set_object_terms( $resume_id, $item[4], 'wpbb_job_skill', false );
+        $candidate_ids[] = $resume_id;
+    }
+
+    // Enrich all sample applications across the full workflow without exposing real personal data.
+    $all_sample_resumes = get_posts( array( 'post_type' => 'wpbb_resume', 'post_status' => 'publish', 'posts_per_page' => 10, 'fields' => 'ids', 'meta_key' => '_wpbb_jobs_sample', 'meta_value' => 1, 'orderby' => 'ID', 'order' => 'ASC' ) );
+    $all_sample_jobs = get_posts( array( 'post_type' => 'wpbb_job', 'post_status' => 'publish', 'posts_per_page' => 10, 'fields' => 'ids', 'meta_key' => '_wpbb_jobs_sample', 'meta_value' => 1, 'orderby' => 'ID', 'order' => 'DESC' ) );
+    $statuses = array( 'new', 'reviewing', 'shortlisted', 'interview', 'offered', 'hired', 'rejected', 'withdrawn' );
+    $new_apps = 0;
+    foreach ( array_slice( $all_sample_resumes, 0, min( 8, count( $all_sample_jobs ) ) ) as $index => $resume_id ) {
+        $job_id = (int) ( $all_sample_jobs[ $index ] ?? 0 );
+        if ( ! $job_id ) continue;
+        $existing = get_posts( array( 'post_type' => 'wpbb_application', 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'meta_query' => array( array( 'key' => '_wpbb_application_job_id', 'value' => $job_id ), array( 'key' => '_wpbb_application_resume_id', 'value' => $resume_id ) ) ) );
+        $resume = get_post( $resume_id );
+        $company = wpbb_jobs_company_for_job( $job_id );
+        $application_id = $existing ? (int) $existing[0] : wp_insert_post( array(
+            'post_type' => 'wpbb_application', 'post_status' => 'publish', 'post_title' => $resume->post_title . ' — ' . get_the_title( $job_id ), 'post_author' => $author,
+            'post_date' => wp_date( 'Y-m-d H:i:s', strtotime( '-' . ( $index + 1 ) . ' days' ) ),
+        ) );
+        if ( ! $application_id || is_wp_error( $application_id ) ) continue;
+        if ( ! $existing ) $new_apps++;
+        update_post_meta( $application_id, '_wpbb_jobs_sample', 1 );
+        update_post_meta( $application_id, '_wp_theme_demo_profile', 'jobs' );
+        update_post_meta( $application_id, '_wpbb_application_job_id', $job_id );
+        update_post_meta( $application_id, '_wpbb_application_resume_id', $resume_id );
+        update_post_meta( $application_id, '_wpbb_application_candidate_id', 0 );
+        update_post_meta( $application_id, '_wpbb_application_company_id', $company instanceof WP_Post ? $company->ID : 0 );
+        update_post_meta( $application_id, '_wpbb_application_name', $resume->post_title );
+        update_post_meta( $application_id, '_wpbb_application_email', 'demo.candidate' . ( $index + 1 ) . '@example.com' );
+        update_post_meta( $application_id, '_wpbb_application_message', __( 'Demo application showing a realistic recruitment workflow state and employer review queue.', 'wp-bbtheme-child' ) );
+        update_post_meta( $application_id, '_wpbb_application_status', $statuses[ $index ] ?? 'new' );
+    }
+
+    $company_total = count( get_posts( array( 'post_type' => 'wpbb_company', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_wpbb_jobs_sample', 'meta_value' => 1 ) ) );
+    $job_total = count( get_posts( array( 'post_type' => 'wpbb_job', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_wpbb_jobs_sample', 'meta_value' => 1 ) ) );
+    $resume_total = count( get_posts( array( 'post_type' => 'wpbb_resume', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_wpbb_jobs_sample', 'meta_value' => 1 ) ) );
+    $application_total = count( get_posts( array( 'post_type' => 'wpbb_application', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_wpbb_jobs_sample', 'meta_value' => 1 ) ) );
+
+    return array(
+        'companies' => $company_total,
+        'jobs_created' => (int) ( $base['jobs_created'] ?? 0 ) + $new_jobs,
+        'jobs_total' => $job_total,
+        'resumes' => $resume_total,
+        'applications_created' => (int) ( $base['applications_created'] ?? 0 ) + $new_apps,
+        'applications_total' => $application_total,
+    );
 }
 
 function wpbb_jobs_job_schema() {
