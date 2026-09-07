@@ -59,7 +59,9 @@ function wpbb_jobs_home_extra_sections( $content, $profile ) {
         __( 'Employer dashboard', 'wp-bbtheme-child' ),
         wpbb_jobs_page_url( 'employer-dashboard' )
     );
-    $paths = wpbb_child_v62_block( 'wpbb/row', array( 'gutterX' => 'gx-4', 'gutterY' => 'gy-4', 'customClasses' => 'wpbb-jobs-paths-row' ),
+    $paths_intro  = wpbb_child_v62_paragraph( __( 'Choose your route', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
+    $paths_intro .= wpbb_child_v62_heading( __( 'Start with the tools that match your role.', 'wp-bbtheme-child' ), 2, 'wpbb-jobs-paths-title' );
+    $paths = $paths_intro . wpbb_child_v62_block( 'wpbb/row', array( 'gutterX' => 'gx-4', 'gutterY' => 'gy-4', 'customClasses' => 'wpbb-jobs-paths-row' ),
         wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 6, 'customClasses' => 'd-flex' ), $candidate_card ) .
         wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 6, 'customClasses' => 'd-flex' ), $employer_card )
     );
@@ -70,6 +72,48 @@ function wpbb_jobs_home_extra_sections( $content, $profile ) {
         . wpbb_jobs_section( $paths, 'wpbb-jobs-paths-section' );
 }
 add_filter( 'wp_theme_demo_extra_home_sections', 'wpbb_jobs_home_extra_sections', 20, 2 );
+
+
+/**
+ * Final Jobs homepage safety pass.
+ *
+ * Older imported pages can contain two self-closing Icon Cards with no attrs in
+ * the candidate/employer pathway section. Populate those placeholders so both
+ * frontend and editor render a real recruitment choice instead of default cards.
+ */
+function wpbb_jobs_repair_canonical_home_content( $content, $profile = array() ) {
+    if ( ( $profile['id'] ?? '' ) !== 'jobs' || ! is_string( $content ) ) return $content;
+
+    $cards = array(
+        wpbb_child_v62_icon_card(
+            __( 'I am looking for work', 'wp-bbtheme-child' ),
+            __( 'Search roles, build your candidate profile and keep applications organised from your dashboard.', 'wp-bbtheme-child' ),
+            'wpbb-jobs-path-card',
+            __( 'Candidate dashboard', 'wp-bbtheme-child' ),
+            wpbb_jobs_page_url( 'candidate-dashboard' )
+        ),
+        wpbb_child_v62_icon_card(
+            __( 'I am hiring', 'wp-bbtheme-child' ),
+            __( 'Create an employer profile, publish opportunities and manage candidate applications in one recruitment workspace.', 'wp-bbtheme-child' ),
+            'wpbb-jobs-path-card',
+            __( 'Employer dashboard', 'wp-bbtheme-child' ),
+            wpbb_jobs_page_url( 'employer-dashboard' )
+        ),
+    );
+
+    $index = 0;
+    $content = preg_replace_callback(
+        '~<!--\\s*wp:wpbb/icon-card\\s*/-->~',
+        static function() use ( &$index, $cards ) {
+            if ( $index >= count( $cards ) ) return '<!-- wp:wpbb/icon-card /-->';
+            return $cards[ $index++ ];
+        },
+        $content,
+        2
+    );
+
+    return $content;
+}
 
 function wpbb_jobs_portal_page_content( $slug ) {
     $pages = array(

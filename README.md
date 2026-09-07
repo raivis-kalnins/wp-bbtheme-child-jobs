@@ -1,4 +1,4 @@
-# WP BBTheme Child Jobs 3.8.10.70
+# WP BBTheme Child Jobs 3.8.10.72
 
 A self-contained **HR / Jobs / recruitment** child theme for the WP BBTheme suite. The recruitment engine is integrated directly into the child theme, so **WP Job Portal is not required**.
 
@@ -6,7 +6,7 @@ A self-contained **HR / Jobs / recruitment** child theme for the WP BBTheme suit
 
 1. Install and activate the **WP BBTheme** parent theme.
 2. Install and activate **WP BBuilder 5.6.8 or newer**.
-3. Install and activate **WP BBTheme Child Jobs 3.8.10.70**.
+3. Install and activate **WP BBTheme Child Jobs 3.8.10.72**.
 4. Open **HR Jobs → Setup & Demo** (or **Appearance → HR Jobs Setup**).
 5. Run the parent **Starter Setup / Import active child-theme demo**. The Jobs theme now automatically seeds the recruitment marketplace as part of the same import.
 6. Use **HR Jobs → Setup & Demo → Add / repair HR demo data** only when you want to repair/reseed the integrated recruitment records without rebuilding the whole site demo.
@@ -115,6 +115,16 @@ For a site where recruitment data must remain independent of the active theme, a
 
 This release implements the core careers / ATS / job-marketplace workflow directly in the theme. It does **not** copy commercial/premium add-ons from WP Job Portal such as paid credit packages, external AI services, premium messaging, PDF generation or payment add-ons.
 
+
+
+## 3.8.10.72 update
+
+- Fixes the English Starter Demo overwrite that could replace the rich sector homepage with empty/default BBuilder Swiper, Icon Card, Fun Fact and Catalogue blocks.
+- Uses the parent theme’s canonical rich sector serializer for managed English Home, About, Services, For Candidates/Industries and Contact pages. Existing localized demo pages are preserved rather than overwritten by the repair pass.
+- Adds dedicated block-theme and PHP fallback templates for individual `/job/.../` and `/employer/.../` URLs, including job metadata, employer details, description, skills and the application form.
+- Refreshes the `/job/` rewrite rules once after upgrade so existing demo vacancy links resolve correctly.
+- Adds shared spacing, container, card-height, media and responsive alignment fixes used across the 15-theme suite.
+- Keeps the rich integrated demo marketplace: employers, 20 jobs, candidate profiles and example application workflow states remain seeded by Starter Setup.
 
 ## 3.8.10.70 update
 

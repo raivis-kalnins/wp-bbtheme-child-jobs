@@ -1,6 +1,6 @@
 <?php
 /**
- * Shared v3.8.10.67 BBuilder demo/admin consistency layer.
+ * Shared v3.8.10.72 BBuilder demo/admin consistency layer.
  *
  * Goals:
  * - BBuilder Row/Column are the only grid primitives.
@@ -633,65 +633,180 @@ if ( ! function_exists( 'wpbb_child_v62_has_placeholder_dynamic_blocks' ) ) {
     }
 }
 
+if ( ! function_exists( 'wpbb_child_v71_is_source_language' ) ) {
+    /** Only rebuild the canonical English/source demo page, never a managed translation. */
+    function wpbb_child_v71_is_source_language( $post_id ) {
+        if ( function_exists( 'pll_get_post_language' ) ) {
+            $lang = sanitize_key( (string) pll_get_post_language( $post_id, 'slug' ) );
+            if ( $lang && 'en' !== $lang ) return false;
+        }
+        return true;
+    }
+}
+
+if ( ! function_exists( 'wpbb_child_v71_demo_profile' ) ) {
+    function wpbb_child_v71_demo_profile() {
+        if ( function_exists( 'wp_theme_get_demo_profile' ) ) return (array) wp_theme_get_demo_profile();
+        return function_exists( 'wpbb_child_v62_profile' ) ? (array) wpbb_child_v62_profile() : array();
+    }
+}
+
+
+if ( ! function_exists( 'wpbb_child_v72_repair_canonical_markup' ) ) {
+    /**
+     * Keep parent-generated rich demo markup valid for Gutenberg/BBuilder.
+     *
+     * The parent partner strip historically emitted its heading as raw HTML
+     * directly inside wpbb/column. Column saves InnerBlocks.Content only, so
+     * Gutenberg treated that raw paragraph as invalid column content. Repair
+     * only the known serialization defects; do not rewrite authored layout.
+     */
+    function wpbb_child_v72_repair_canonical_markup( $content ) {
+        if ( ! is_string( $content ) || '' === trim( $content ) ) return $content;
+
+        $content = str_replace(
+            '<!-- wp:wpbb/row --></div><!-- /wp:group -->',
+            '<!-- /wp:wpbb/row --></div><!-- /wp:group -->',
+            $content
+        );
+
+        // Raw partner heading directly inside a BBuilder Column -> real core paragraph block.
+        $content = preg_replace_callback(
+            '~(<!--\\s*wp:wpbb/column\\b[^>]*-->\\s*)(<p class="wp-theme-partners-heading">.*?</p>)~s',
+            static function( $m ) {
+                return $m[1] . '<!-- wp:paragraph {"className":"wp-theme-partners-heading"} -->' . $m[2] . '<!-- /wp:paragraph -->';
+            },
+            $content
+        );
+
+        // Keep heading level metadata aligned with the actual h1-h6 element.
+        $content = preg_replace_callback(
+            '~<!--\\s*wp:heading(?:\\s+(\\{.*?\\}))?\\s*-->\\s*<h([1-6])([^>]*)>~s',
+            static function( $m ) {
+                $level = max( 1, min( 6, (int) $m[2] ) );
+                $attrs = array();
+                if ( ! empty( $m[1] ) ) {
+                    $decoded = json_decode( $m[1], true );
+                    if ( is_array( $decoded ) ) $attrs = $decoded;
+                }
+                if ( 2 !== $level ) $attrs['level'] = $level; else unset( $attrs['level'] );
+                return '<!-- wp:heading' . ( $attrs ? ' ' . wp_json_encode( $attrs, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) : '' ) . ' --><h' . $level . $m[3] . '>';
+            },
+            $content
+        );
+
+        return $content;
+    }
+}
+
+if ( ! function_exists( 'wpbb_child_v71_canonical_home_content' ) ) {
+    /** The parent sector importer is the canonical rich-demo serializer. */
+    function wpbb_child_v71_canonical_home_content( $profile = array() ) {
+        if ( function_exists( 'wp_theme_build_sector_homepage_content' ) ) {
+            $content = (string) wp_theme_build_sector_homepage_content();
+        } elseif ( function_exists( 'wp_theme_demo_homepage_content' ) ) {
+            $content = (string) wp_theme_demo_homepage_content();
+        } else {
+            $content = function_exists( 'wpbb_child_v62_front_content' ) ? (string) wpbb_child_v62_front_content( $profile ) : '';
+        }
+        if ( function_exists( 'wpbb_child_v72_repair_canonical_markup' ) ) $content = wpbb_child_v72_repair_canonical_markup( $content );
+        if ( function_exists( 'wpbb_jobs_repair_canonical_home_content' ) ) $content = wpbb_jobs_repair_canonical_home_content( $content, $profile );
+        return $content;
+    }
+}
+
+if ( ! function_exists( 'wpbb_child_v71_canonical_page_content' ) ) {
+    function wpbb_child_v71_canonical_page_content( $slug, $profile ) {
+        if ( function_exists( 'wp_theme_sector_page_content' ) ) {
+            $content = (string) wp_theme_sector_page_content( $slug, $profile );
+        } else {
+            $content = function_exists( 'wpbb_child_v62_simple_page_content' ) ? (string) wpbb_child_v62_simple_page_content( $profile, $slug ) : '';
+        }
+        return function_exists( 'wpbb_child_v72_repair_canonical_markup' ) ? wpbb_child_v72_repair_canonical_markup( $content ) : $content;
+    }
+}
+
+if ( ! function_exists( 'wpbb_child_v71_sync_managed_translations' ) ) {
+    /** Re-sync only translations created by Starter Setup after repairing English source content. */
+    function wpbb_child_v71_sync_managed_translations( $source_ids ) {
+        $source_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $source_ids ) ) ) );
+        if ( ! $source_ids || ! function_exists( 'wp_theme_demo_create_polylang_translations' ) || ! function_exists( 'wp_theme_demo_polylang_languages' ) ) return;
+        $languages = array_keys( (array) wp_theme_demo_polylang_languages() );
+        if ( $languages ) wp_theme_demo_create_polylang_translations( $source_ids, $languages );
+    }
+}
+
 if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
     /**
-     * Keep the parent/sector importer as the source of truth for rich demo data.
-     * This pass only repairs serialization and a truly empty placeholder hero.
-     * It never replaces populated About/Services/Industries/Contact pages.
+     * v3.8.10.72 canonical demo repair.
+     *
+     * Older child releases rebuilt the English source at priority 999 with a
+     * compact BBuilder fallback. Polylang had already copied the richer parent
+     * version at priority 5, which is why translated pages could look better
+     * than English. The parent sector importer is now the sole content source.
      */
     function wpbb_child_v62_rebuild_demo_pages( $force = false ) {
-        if ( ! current_user_can( 'manage_options' ) ) return;
+        if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) return;
 
         $stylesheet = sanitize_key( get_stylesheet() );
-        $done_key   = 'wpbb_child_v65_demo_system_' . $stylesheet;
+        $done_key   = 'wpbb_child_v72_demo_system_' . $stylesheet;
         $front      = absint( get_option( 'page_on_front' ) );
         $front_content = $front ? (string) get_post_field( 'post_content', $front, 'raw' ) : '';
-        $needs_placeholder_repair = $front && wpbb_child_v62_has_placeholder_dynamic_blocks( $front_content );
+        $placeholder = $front && wpbb_child_v62_has_placeholder_dynamic_blocks( $front_content );
+        $already = '3.8.10.72' === (string) get_option( $done_key );
+        if ( ! $force && ! $placeholder && $already ) return;
 
-        if ( ! $force && ! $needs_placeholder_repair && '3.8.10.67' === (string) get_option( $done_key ) ) return;
-
-        $profile = wpbb_child_v62_profile();
+        $profile = wpbb_child_v71_demo_profile();
         if ( empty( $profile['id'] ) ) {
-            update_option( $done_key, '3.8.10.67', false );
+            update_option( $done_key, '3.8.10.72', false );
             return;
         }
 
-        // Only use the compact generated homepage as a recovery fallback for an
-        // actual placeholder. A normal rich imported homepage is never replaced.
-        if ( $needs_placeholder_repair && $front && wpbb_child_v62_is_managed_demo_page( $front ) ) {
-            $clean = wpbb_child_v62_front_content( $profile );
-            if ( $clean ) {
-                wp_update_post( array( 'ID' => $front, 'post_content' => $clean ) );
-                update_post_meta( $front, '_wpbb_child_bbuilder_version', wp_get_theme()->get( 'Version' ) );
-                clean_post_cache( $front );
+        $source_ids = array();
+
+        if ( $front && wpbb_child_v62_is_managed_demo_page( $front ) && wpbb_child_v71_is_source_language( $front ) ) {
+            $needs_refresh = $force || $placeholder || '3.8.10.72' !== (string) get_post_meta( $front, '_wpbb_child_bbuilder_version', true );
+            if ( $needs_refresh ) {
+                $clean = wpbb_child_v71_canonical_home_content( $profile );
+                if ( '' !== trim( $clean ) ) {
+                    wp_update_post( array( 'ID' => $front, 'post_content' => $clean ) );
+                    update_post_meta( $front, '_wpbb_child_bbuilder_version', '3.8.10.72' );
+                    update_post_meta( $front, '_wp_theme_demo_managed', '1' );
+                    clean_post_cache( $front );
+                }
             }
+            $source_ids[] = $front;
         }
 
-        $page_ids = get_posts( array(
-            'post_type'      => 'page',
-            'post_status'    => 'any',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'no_found_rows'  => true,
-        ) );
-
-        foreach ( $page_ids as $page_id ) {
-            if ( ! wpbb_child_v62_is_managed_demo_page( $page_id ) ) continue;
-            $content = (string) get_post_field( 'post_content', $page_id, 'raw' );
-            if ( '' === trim( $content ) ) continue;
-            $fixed = wpbb_child_v62_repair_serialized_content( $content );
-            if ( $fixed !== $content ) wp_update_post( array( 'ID' => $page_id, 'post_content' => $fixed ) );
-            update_post_meta( $page_id, '_wpbb_child_bbuilder_version', wp_get_theme()->get( 'Version' ) );
+        foreach ( array( 'about', 'services', 'industries', 'contact' ) as $slug ) {
+            $page = get_page_by_path( $slug );
+            if ( ! $page instanceof WP_Post || ! wpbb_child_v62_is_managed_demo_page( $page->ID ) || ! wpbb_child_v71_is_source_language( $page->ID ) ) continue;
+            $needs_refresh = $force || '3.8.10.72' !== (string) get_post_meta( $page->ID, '_wpbb_child_bbuilder_version', true );
+            if ( $needs_refresh ) {
+                $clean = wpbb_child_v71_canonical_page_content( $slug, $profile );
+                if ( '' !== trim( $clean ) ) {
+                    wp_update_post( array( 'ID' => $page->ID, 'post_content' => $clean ) );
+                    update_post_meta( $page->ID, '_wpbb_child_bbuilder_version', '3.8.10.72' );
+                    update_post_meta( $page->ID, '_wp_theme_demo_managed', '1' );
+                    clean_post_cache( $page->ID );
+                }
+            }
+            $source_ids[] = $page->ID;
         }
 
-        update_option( $done_key, '3.8.10.67', false );
+        // Starter Setup owns translation generation. Existing localized demo pages
+        // are deliberately left intact here because they may already contain
+        // better human/edited translations than the shared phrase dictionary.
+        update_option( $done_key, '3.8.10.72', false );
     }
     add_action( 'admin_init', 'wpbb_child_v62_rebuild_demo_pages', 80 );
 }
 
 if ( ! function_exists( 'wpbb_child_v62_after_demo_import' ) ) {
     function wpbb_child_v62_after_demo_import( $page_id = 0, $profile = array() ) {
-        delete_option( 'wpbb_child_v65_demo_system_' . sanitize_key( get_stylesheet() ) );
+        delete_option( 'wpbb_child_v72_demo_system_' . sanitize_key( get_stylesheet() ) );
+        // Run after Polylang's initial copy, but serialize English from the same
+        // canonical parent content. Existing localized pages are preserved.
         if ( is_admin() && current_user_can( 'manage_options' ) ) wpbb_child_v62_rebuild_demo_pages( true );
     }
     add_action( 'wp_theme_after_demo_import', 'wpbb_child_v62_after_demo_import', 999, 2 );

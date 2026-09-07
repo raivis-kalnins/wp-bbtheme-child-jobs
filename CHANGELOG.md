@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.8.10.72
+
+- Repaired the managed English demo from the parent canonical rich sector content instead of the old compact fallback serializer.
+- Preserved existing localized demo pages during the child-level repair pass.
+- Added deterministic single Job and Employer templates for block and classic template resolution.
+- Added one-time rewrite refresh for `/job/` routes after upgrade.
+- Added suite-wide layout rhythm and WooCommerce control compatibility rules.
+
 ## 3.8.10.70
 
 - Replaces the distinct TalentBridge-style theme screenshot with the shared WP Base sector preview-card layout so the Jobs theme visually matches the rest of the suite in wp-admin.

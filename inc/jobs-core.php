@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const WPBB_JOBS_VERSION = '3.8.10.70';
+const WPBB_JOBS_VERSION = '3.8.10.71';
 
 function wpbb_jobs_settings() {
     $defaults = array(
@@ -1310,3 +1310,13 @@ function wpbb_jobs_privacy_eraser( $email_address, $page = 1 ) {
         'done'           => true,
     );
 }
+
+/** Flush the /job/ rewrite once after upgrading the integrated Jobs engine. */
+function wpbb_jobs_maybe_refresh_rewrites_v71() {
+    if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) return;
+    if ( '3.8.10.71' === (string) get_option( 'wpbb_jobs_rewrite_version' ) ) return;
+    wpbb_jobs_register_content_types();
+    flush_rewrite_rules( false );
+    update_option( 'wpbb_jobs_rewrite_version', '3.8.10.71', false );
+}
+add_action( 'admin_init', 'wpbb_jobs_maybe_refresh_rewrites_v71', 25 );

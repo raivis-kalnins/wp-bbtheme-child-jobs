@@ -1,3 +1,370 @@
+/* v3.8.10.72: Gutenberg preview parity for integrated HR Jobs.
+ * Frontend portal rules are mirrored under .editor-styles-wrapper so ServerSideRender
+ * blocks look like the site without leaking styles into wp-admin chrome. */
+/* Integrated HR Jobs presentation layer. Scoped to this child theme. */
+.editor-styles-wrapper {
+  --wpbb-jobs-ink: var(--theme-heading-color, #0b1739);
+  --wpbb-jobs-text: var(--theme-text-color, #23304d);
+  --wpbb-jobs-brand: var(--theme-brand-color, #3155d9);
+  --wpbb-jobs-accent: var(--theme-accent-color, #19a7ce);
+  --wpbb-jobs-surface: var(--theme-surface-color, #fff);
+  --wpbb-jobs-soft: var(--theme-surface-alt-color, #eef3fb);
+  --wpbb-jobs-border: var(--theme-border-color, #dce4f0);
+  --wpbb-jobs-muted: var(--theme-grey-dark-color, #5d6a82);
+  --wpbb-jobs-success: var(--theme-success-color, #167c5a);
+  --wpbb-jobs-radius: var(--theme-radius, 18px);
+  --wpbb-jobs-shadow: 0 18px 48px rgba(11, 23, 57, .08);
+}
+
+.editor-styles-wrapper .wpbb-jobs-section-shell { margin: 0; }
+.editor-styles-wrapper .wpbb-jobs-section { padding-block: clamp(3rem, 6vw, 5.25rem); }
+.editor-styles-wrapper .wpbb-jobs-section.bg-light { background: var(--wpbb-jobs-soft); }
+.editor-styles-wrapper .wpbb-jobs-section .wpbb-v67-section-inner { min-width: 0; }
+.editor-styles-wrapper .wpbb-jobs-search-band { padding-top: clamp(2rem, 4vw, 3.5rem); }
+.editor-styles-wrapper .wpbb-jobs-search-title { max-width: 760px; margin-bottom: 1.5rem; }
+.editor-styles-wrapper .wpbb-jobs-path-card { height: 100%; width: 100%; }
+.editor-styles-wrapper .wpbb-jobs-text-link { font-weight: 750; text-decoration: none; }
+.editor-styles-wrapper .wpbb-jobs-portal-page-header { padding-bottom: clamp(2.25rem, 4vw, 3.75rem); }
+.editor-styles-wrapper .wpbb-jobs-portal-page-body { padding-top: clamp(2.5rem, 5vw, 4.75rem); }
+.editor-styles-wrapper .wpbb-jobs-portal-page-title { max-width: 960px; margin-bottom: .85rem; font-size: clamp(2.5rem, 6vw, 5.25rem); line-height: .98; }
+.editor-styles-wrapper .wpbb-jobs-portal-page-intro { max-width: 800px; margin-bottom: 0; font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--wpbb-jobs-text); }
+
+.editor-styles-wrapper .wpbb-jobs-button,
+.editor-styles-wrapper button.wpbb-jobs-button,
+.editor-styles-wrapper .wpbb-jobs-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  min-height: 44px;
+  padding: .7rem 1.1rem;
+  border: 1px solid var(--wpbb-jobs-brand);
+  border-radius: 10px;
+  background: var(--wpbb-jobs-brand);
+  color: #fff;
+  font-weight: 750;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+.editor-styles-wrapper .wpbb-jobs-button:hover,
+.editor-styles-wrapper .wpbb-jobs-button:focus-visible { filter: brightness(.94); color: #fff; }
+.editor-styles-wrapper .wpbb-jobs-button.is-secondary { background: transparent; color: var(--wpbb-jobs-brand); }
+.editor-styles-wrapper .wpbb-jobs-link-button { min-height: 34px; padding: .4rem .7rem; font-size: .86rem; }
+
+.editor-styles-wrapper .wpbb-jobs-notice {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--wpbb-jobs-border);
+  border-left-width: 4px;
+  border-radius: 12px;
+  background: var(--wpbb-jobs-surface);
+}
+.editor-styles-wrapper .wpbb-jobs-notice.is-success { border-left-color: var(--wpbb-jobs-success); background: #f1fbf6; }
+.editor-styles-wrapper .wpbb-jobs-notice.is-error { border-left-color: #b42318; background: #fff6f5; }
+.editor-styles-wrapper .wpbb-jobs-notice.is-info { border-left-color: var(--wpbb-jobs-brand); background: var(--wpbb-jobs-soft); }
+
+.editor-styles-wrapper .wpbb-jobs-panel,
+.editor-styles-wrapper .wpbb-jobs-gate,
+.editor-styles-wrapper .wpbb-jobs-empty {
+  border: 1px solid var(--wpbb-jobs-border);
+  border-radius: var(--wpbb-jobs-radius);
+  background: var(--wpbb-jobs-surface);
+  box-shadow: 0 10px 34px rgba(11, 23, 57, .05);
+}
+.editor-styles-wrapper .wpbb-jobs-panel { padding: clamp(1.25rem, 3vw, 2rem); }
+.editor-styles-wrapper .wpbb-jobs-gate,
+.editor-styles-wrapper .wpbb-jobs-empty { padding: 1.4rem 1.5rem; }
+.editor-styles-wrapper .wpbb-jobs-panel > :first-child,
+.editor-styles-wrapper .wpbb-jobs-gate > :first-child { margin-top: 0; }
+.editor-styles-wrapper .wpbb-jobs-panel > :last-child,
+.editor-styles-wrapper .wpbb-jobs-gate > :last-child { margin-bottom: 0; }
+
+/* Search */
+.editor-styles-wrapper .wpbb-jobs-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(150px, .8fr)) auto;
+  gap: .85rem;
+  align-items: end;
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  border: 1px solid var(--wpbb-jobs-border);
+  border-radius: var(--wpbb-jobs-radius);
+  background: var(--wpbb-jobs-surface);
+  box-shadow: var(--wpbb-jobs-shadow);
+}
+.editor-styles-wrapper .wpbb-jobs-search.is-compact { grid-template-columns: minmax(0, 1.7fr) repeat(2, minmax(150px, .85fr)) auto; }
+.editor-styles-wrapper .wpbb-jobs-search__field { min-width: 0; }
+.editor-styles-wrapper .wpbb-jobs-search label,
+.editor-styles-wrapper .wpbb-jobs-form label {
+  display: grid;
+  gap: .42rem;
+  margin: 0;
+  color: var(--wpbb-jobs-ink);
+  font-size: .84rem;
+  font-weight: 700;
+}
+.editor-styles-wrapper .wpbb-jobs-search :where(input, select),
+.editor-styles-wrapper .wpbb-jobs-form :where(input:not([type="checkbox"]):not([type="file"]), select, textarea) {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  border: 1px solid var(--wpbb-jobs-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--wpbb-jobs-text);
+  padding: .68rem .8rem;
+}
+.editor-styles-wrapper .wpbb-jobs-form textarea { min-height: 130px; resize: vertical; }
+.editor-styles-wrapper .wpbb-jobs-search :where(input, select):focus,
+.editor-styles-wrapper .wpbb-jobs-form :where(input, select, textarea):focus {
+  border-color: var(--wpbb-jobs-brand);
+  outline: 3px solid color-mix(in srgb, var(--wpbb-jobs-brand) 16%, transparent);
+  outline-offset: 0;
+}
+
+/* Job cards */
+.editor-styles-wrapper .wpbb-jobs-grid,
+.editor-styles-wrapper .wpbb-jobs-company-grid,
+.editor-styles-wrapper .wpbb-jobs-resume-grid {
+  display: grid;
+  gap: 1rem;
+}
+.editor-styles-wrapper .wpbb-jobs-grid--1,
+.editor-styles-wrapper .wpbb-jobs-company-grid--1,
+.editor-styles-wrapper .wpbb-jobs-resume-grid--1 { grid-template-columns: 1fr; }
+.editor-styles-wrapper .wpbb-jobs-grid--2,
+.editor-styles-wrapper .wpbb-jobs-resume-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.editor-styles-wrapper .wpbb-jobs-grid--3,
+.editor-styles-wrapper .wpbb-jobs-company-grid--3,
+.editor-styles-wrapper .wpbb-jobs-resume-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.editor-styles-wrapper .wpbb-jobs-company-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.editor-styles-wrapper .wpbb-jobs-company-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.editor-styles-wrapper .wpbb-jobs-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.2rem;
+  border: 1px solid var(--wpbb-jobs-border);
+  border-radius: 16px;
+  background: var(--wpbb-jobs-surface);
+  box-shadow: 0 8px 28px rgba(11,23,57,.05);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.editor-styles-wrapper .wpbb-jobs-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--wpbb-jobs-brand) 36%, var(--wpbb-jobs-border)); box-shadow: 0 15px 38px rgba(11,23,57,.08); }
+.editor-styles-wrapper .wpbb-jobs-card.is-featured { border-color: color-mix(in srgb, var(--wpbb-jobs-brand) 40%, var(--wpbb-jobs-border)); }
+.editor-styles-wrapper .wpbb-jobs-card__logo,
+.editor-styles-wrapper .wpbb-jobs-company-card__logo { min-width: 0; }
+.editor-styles-wrapper .wpbb-jobs-company-logo,
+.editor-styles-wrapper .wpbb-jobs-company-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid var(--wpbb-jobs-border);
+  border-radius: 13px;
+  background: var(--wpbb-jobs-soft);
+  color: var(--wpbb-jobs-brand);
+  object-fit: cover;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.editor-styles-wrapper .wpbb-jobs-card__body { display: flex; min-width: 0; flex-direction: column; }
+.editor-styles-wrapper .wpbb-jobs-card__topline { display: flex; flex-wrap: wrap; gap: .42rem; margin-bottom: .65rem; }
+.editor-styles-wrapper .wpbb-jobs-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: .24rem .55rem;
+  border-radius: 999px;
+  background: var(--wpbb-jobs-soft);
+  color: var(--wpbb-jobs-text);
+  font-size: .75rem;
+  font-weight: 700;
+}
+.editor-styles-wrapper .wpbb-jobs-chip.is-featured { background: color-mix(in srgb, var(--wpbb-jobs-brand) 12%, white); color: var(--wpbb-jobs-brand); }
+.editor-styles-wrapper .wpbb-jobs-card__title { margin: 0 0 .2rem; font-size: clamp(1.12rem, 2vw, 1.35rem); line-height: 1.2; }
+.editor-styles-wrapper .wpbb-jobs-card__title a { color: var(--wpbb-jobs-ink); text-decoration: none; }
+.editor-styles-wrapper .wpbb-jobs-card__title a:hover { color: var(--wpbb-jobs-brand); }
+.editor-styles-wrapper .wpbb-jobs-card__company { margin: 0 0 .7rem; color: var(--wpbb-jobs-muted); font-weight: 650; }
+.editor-styles-wrapper .wpbb-jobs-card__meta { display: flex; flex-wrap: wrap; gap: .35rem .8rem; margin-bottom: .7rem; color: var(--wpbb-jobs-muted); font-size: .84rem; }
+.editor-styles-wrapper .wpbb-jobs-card__meta span:not(:last-child)::after { content: "·"; margin-left: .8rem; color: var(--wpbb-jobs-border); }
+.editor-styles-wrapper .wpbb-jobs-card__excerpt { margin: 0 0 .9rem; color: var(--wpbb-jobs-text); }
+.editor-styles-wrapper .wpbb-jobs-card__link { margin-top: auto; color: var(--wpbb-jobs-brand); font-weight: 750; text-decoration: none; }
+
+/* Companies */
+.editor-styles-wrapper .wpbb-jobs-company-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 1rem;
+  min-width: 0;
+  height: 100%;
+  padding: 1.2rem;
+  border: 1px solid var(--wpbb-jobs-border);
+  border-radius: 16px;
+  background: var(--wpbb-jobs-surface);
+}
+.editor-styles-wrapper .wpbb-jobs-company-card h3 { margin: .08rem 0 .25rem; font-size: 1.08rem; }
+.editor-styles-wrapper .wpbb-jobs-company-card h3 a { color: var(--wpbb-jobs-ink); text-decoration: none; }
+.editor-styles-wrapper .wpbb-jobs-company-card__location { margin: 0 0 .55rem; color: var(--wpbb-jobs-muted); font-size: .85rem; }
+.editor-styles-wrapper .wpbb-jobs-company-card p { margin-bottom: .65rem; }
+
+/* Candidate cards */
+.editor-styles-wrapper .wpbb-jobs-resume-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  padding: 1.25rem;
+  border: 1px solid var(--wpbb-jobs-border);
+  border-radius: 16px;
+  background: var(--wpbb-jobs-surface);
+}
+.editor-styles-wrapper .wpbb-jobs-resume-card__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: .9rem;
+  border-radius: 50%;
+  background: var(--wpbb-jobs-soft);
+  color: var(--wpbb-jobs-brand);
+  font-weight: 800;
+}
+.editor-styles-wrapper .wpbb-jobs-resume-card h3 { margin: 0 0 .25rem; }
+.editor-styles-wrapper .wpbb-jobs-resume-card__headline { margin: 0 0 .35rem; color: var(--wpbb-jobs-text); font-weight: 650; }
+.editor-styles-wrapper .wpbb-jobs-resume-card__meta,
+.editor-styles-wrapper .wpbb-jobs-resume-card__skills { margin: 0 0 .55rem; color: var(--wpbb-jobs-muted); font-size: .86rem; }
+
+/* Forms and accounts */
+.editor-styles-wrapper .wpbb-jobs-form { display: grid; gap: 1rem; }
+.editor-styles-wrapper .wpbb-jobs-form__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.editor-styles-wrapper .wpbb-jobs-form__hint { margin: -.25rem 0 .2rem; color: var(--wpbb-jobs-muted); }
+.editor-styles-wrapper .wpbb-jobs-check { display: flex !important; grid-template-columns: auto 1fr; align-items: center; gap: .55rem !important; font-weight: 600 !important; }
+.editor-styles-wrapper .wpbb-jobs-check input { width: 18px; height: 18px; }
+.editor-styles-wrapper .wpbb-jobs-auth-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.editor-styles-wrapper .wpbb-jobs-auth-grid #loginform { display: grid; gap: .9rem; }
+.editor-styles-wrapper .wpbb-jobs-auth-grid #loginform p { margin: 0; }
+.editor-styles-wrapper .wpbb-jobs-auth-grid #loginform label { display: grid; gap: .4rem; font-weight: 700; }
+.editor-styles-wrapper .wpbb-jobs-auth-grid #loginform input[type="text"],
+.editor-styles-wrapper .wpbb-jobs-auth-grid #loginform input[type="password"] { width: 100%; min-height: 44px; box-sizing: border-box; border: 1px solid var(--wpbb-jobs-border); border-radius: 10px; padding: .68rem .8rem; }
+.editor-styles-wrapper .wpbb-jobs-auth-grid #wp-submit { min-height: 44px; border: 0; border-radius: 10px; background: var(--wpbb-jobs-brand); color: #fff; padding: .7rem 1rem; font-weight: 750; cursor: pointer; }
+
+/* Dashboards */
+.editor-styles-wrapper .wpbb-jobs-dashboard { display: grid; gap: 1.25rem; }
+.editor-styles-wrapper .wpbb-jobs-dashboard__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.editor-styles-wrapper .wpbb-jobs-dashboard__stats > div { display: grid; gap: .2rem; padding: 1.1rem 1.25rem; border: 1px solid var(--wpbb-jobs-border); border-radius: 14px; background: var(--wpbb-jobs-soft); }
+.editor-styles-wrapper .wpbb-jobs-dashboard__stats strong { color: var(--wpbb-jobs-ink); font-size: 1.7rem; line-height: 1; }
+.editor-styles-wrapper .wpbb-jobs-dashboard__stats span { color: var(--wpbb-jobs-muted); font-size: .84rem; }
+.editor-styles-wrapper .wpbb-jobs-dashboard__actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+.editor-styles-wrapper .wpbb-jobs-dashboard__columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+.editor-styles-wrapper .wpbb-jobs-dashboard-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.editor-styles-wrapper .wpbb-jobs-dashboard-list li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid var(--wpbb-jobs-border); }
+.editor-styles-wrapper .wpbb-jobs-dashboard-list li:last-child { border-bottom: 0; }
+.editor-styles-wrapper .wpbb-jobs-dashboard-list a { font-weight: 700; text-decoration: none; }
+.editor-styles-wrapper .wpbb-jobs-dashboard-list small { display: block; margin-top: .15rem; color: var(--wpbb-jobs-muted); }
+.editor-styles-wrapper .wpbb-jobs-table-wrap { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.editor-styles-wrapper .wpbb-jobs-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.editor-styles-wrapper .wpbb-jobs-table :where(th, td) { padding: .8rem .75rem; border-bottom: 1px solid var(--wpbb-jobs-border); text-align: left; vertical-align: top; }
+.editor-styles-wrapper .wpbb-jobs-table th { color: var(--wpbb-jobs-ink); font-size: .82rem; }
+.editor-styles-wrapper .wpbb-jobs-table td small { display: block; margin-top: .2rem; color: var(--wpbb-jobs-muted); }
+.editor-styles-wrapper .wpbb-jobs-status { display: inline-flex; padding: .3rem .55rem; border-radius: 999px; background: var(--wpbb-jobs-soft); color: var(--wpbb-jobs-text); font-size: .78rem; font-weight: 750; white-space: nowrap; }
+.editor-styles-wrapper .wpbb-jobs-status:is(.is-hired,.is-offered) { background: #e8f8f0; color: #126a4e; }
+.editor-styles-wrapper .wpbb-jobs-status:is(.is-shortlisted,.is-interview) { background: #eef3ff; color: #3155d9; }
+.editor-styles-wrapper .wpbb-jobs-status:is(.is-rejected,.is-withdrawn) { background: #f6f7f9; color: #6b7280; }
+.editor-styles-wrapper .wpbb-jobs-status-form { display: flex; align-items: center; gap: .5rem; }
+.editor-styles-wrapper .wpbb-jobs-status-form select { min-height: 34px; max-width: 145px; border: 1px solid var(--wpbb-jobs-border); border-radius: 8px; }
+
+/* Single job / company */
+.editor-styles-wrapper .wpbb-jobs-single-meta { display: grid; gap: 1.1rem; margin-bottom: 2rem; }
+.editor-styles-wrapper .wpbb-jobs-single-meta__company { display: flex; align-items: center; gap: .85rem; }
+.editor-styles-wrapper .wpbb-jobs-single-meta__company strong { display: block; color: var(--wpbb-jobs-ink); }
+.editor-styles-wrapper .wpbb-jobs-single-meta__company a { display: inline-block; margin-top: .15rem; font-size: .84rem; text-decoration: none; }
+.editor-styles-wrapper .wpbb-jobs-single-meta__items { display: flex; flex-wrap: wrap; gap: .5rem; }
+.editor-styles-wrapper .wpbb-jobs-single-meta__items span { padding: .42rem .65rem; border-radius: 999px; background: var(--wpbb-jobs-soft); color: var(--wpbb-jobs-text); font-size: .82rem; font-weight: 650; }
+.editor-styles-wrapper .wpbb-jobs-single-apply { margin-top: clamp(2.5rem, 6vw, 4.5rem); }
+.editor-styles-wrapper .wpbb-jobs-company-openings { margin-top: clamp(2.5rem, 6vw, 4.5rem); }
+.editor-styles-wrapper .wpbb-jobs-company-openings h2 { margin-bottom: 1.25rem; }
+
+.editor-styles-wrapper .wpbb-jobs-pagination { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1.5rem; }
+.editor-styles-wrapper .wpbb-jobs-pagination .page-numbers { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; min-height: 38px; padding: .3rem .55rem; border: 1px solid var(--wpbb-jobs-border); border-radius: 9px; text-decoration: none; }
+.editor-styles-wrapper .wpbb-jobs-pagination .current { border-color: var(--wpbb-jobs-brand); background: var(--wpbb-jobs-brand); color: #fff; }
+
+@media (max-width: 1199.98px) {
+  .editor-styles-wrapper .wpbb-jobs-search,
+  .editor-styles-wrapper .wpbb-jobs-search.is-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .editor-styles-wrapper .wpbb-jobs-search__submit { align-self: stretch; }
+  .editor-styles-wrapper .wpbb-jobs-search__submit .wpbb-jobs-button { width: 100%; height: 100%; }
+  .editor-styles-wrapper .wpbb-jobs-company-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 991.98px) {
+  .editor-styles-wrapper .wpbb-jobs-grid--3,
+  .editor-styles-wrapper .wpbb-jobs-company-grid--3,
+  .editor-styles-wrapper .wpbb-jobs-resume-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .editor-styles-wrapper .wpbb-jobs-dashboard__columns { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 767.98px) {
+  .editor-styles-wrapper .wpbb-jobs-section { padding-block: 2.5rem; }
+  .editor-styles-wrapper .wpbb-jobs-search,
+  .editor-styles-wrapper .wpbb-jobs-search.is-compact,
+  .editor-styles-wrapper .wpbb-jobs-grid--2,
+  .editor-styles-wrapper .wpbb-jobs-grid--3,
+  .editor-styles-wrapper .wpbb-jobs-company-grid--2,
+  .editor-styles-wrapper .wpbb-jobs-company-grid--3,
+  .editor-styles-wrapper .wpbb-jobs-company-grid--4,
+  .editor-styles-wrapper .wpbb-jobs-resume-grid--2,
+  .editor-styles-wrapper .wpbb-jobs-resume-grid--3,
+  .editor-styles-wrapper .wpbb-jobs-form__grid,
+  .editor-styles-wrapper .wpbb-jobs-auth-grid,
+  .editor-styles-wrapper .wpbb-jobs-dashboard__stats { grid-template-columns: 1fr; }
+  .editor-styles-wrapper .wpbb-jobs-card,
+  .editor-styles-wrapper .wpbb-jobs-company-card { grid-template-columns: 48px minmax(0, 1fr); padding: 1rem; }
+  .editor-styles-wrapper .wpbb-jobs-company-logo,
+  .editor-styles-wrapper .wpbb-jobs-company-initials { width: 46px; height: 46px; }
+  .editor-styles-wrapper .wpbb-jobs-card__meta span::after { display: none; }
+  .editor-styles-wrapper .wpbb-jobs-dashboard__actions .wpbb-jobs-button { flex: 1 1 100%; }
+}
+
+/* v3.8.10.71 single-job page + shared recruitment rhythm. */
+.editor-styles-wrapper .wpbb-jobs-single-page{background:var(--wpbb-jobs-bg,#fff)}
+.editor-styles-wrapper .wpbb-jobs-single-hero__grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2rem;align-items:end}
+.editor-styles-wrapper .wpbb-jobs-single-hero__chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.editor-styles-wrapper .wpbb-jobs-single-hero__apply{white-space:nowrap;margin-bottom:.4rem}
+.editor-styles-wrapper .wpbb-jobs-single-body{padding-block:clamp(52px,6vw,84px)}
+.editor-styles-wrapper .wpbb-jobs-single-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,.85fr);gap:clamp(26px,4vw,52px);align-items:start}
+.editor-styles-wrapper .wpbb-jobs-single-main{display:grid;gap:1.5rem;min-width:0}
+.editor-styles-wrapper .wpbb-jobs-single-sidebar{position:sticky;top:calc(var(--wp-theme-header-bottom,100px) + 24px);min-width:0}
+.editor-styles-wrapper .wpbb-jobs-single-sidebar .wpbb-jobs-panel{margin:0}
+.editor-styles-wrapper .wpbb-jobs-job-description{font-size:1rem;line-height:1.75}
+.editor-styles-wrapper .wpbb-jobs-job-description h2{margin-top:2rem;margin-bottom:.8rem}
+.editor-styles-wrapper .wpbb-jobs-job-description h2:first-child{margin-top:0}
+.editor-styles-wrapper .wpbb-jobs-job-description ul{padding-left:1.25rem}
+.editor-styles-wrapper .wpbb-jobs-job-skills{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--wpbb-jobs-border,#dce4f0)}
+.editor-styles-wrapper .wpbb-jobs-job-skills>div{display:flex;flex-wrap:wrap;gap:.5rem}
+@media(max-width:991.98px){
+  .editor-styles-wrapper .wpbb-jobs-single-layout{grid-template-columns:1fr}
+  .editor-styles-wrapper .wpbb-jobs-single-sidebar{position:static}
+}
+@media(max-width:767.98px){
+  .editor-styles-wrapper .wpbb-jobs-single-hero__grid{grid-template-columns:1fr;gap:1.25rem;align-items:start}
+  .editor-styles-wrapper .wpbb-jobs-single-hero__apply{justify-self:start}
+}
+.editor-styles-wrapper .wpbb-jobs-company-hero{display:flex;align-items:end;justify-content:space-between;gap:2rem}
+.editor-styles-wrapper .wpbb-jobs-company-hero>div:first-child{display:grid;grid-template-columns:auto 1fr;column-gap:1rem;align-items:center}
+.editor-styles-wrapper .wpbb-jobs-company-hero .wpbb-jobs-company-logo,
+.editor-styles-wrapper .wpbb-jobs-company-hero .wpbb-jobs-company-initials{grid-row:1/3}
+.editor-styles-wrapper .wpbb-jobs-company-hero h1{margin-bottom:.4rem}
+.editor-styles-wrapper .wpbb-jobs-company-hero .wp-theme-sector-lead{margin:0}
+.editor-styles-wrapper .wpbb-jobs-company-layout{display:grid;gap:clamp(36px,5vw,64px)}
+@media(max-width:767.98px){.editor-styles-wrapper .wpbb-jobs-company-hero{align-items:flex-start;flex-direction:column}}
+
+
+/* Editor-only block boundaries and spacing. */
 .editor-styles-wrapper {
   --wpbb-jobs-brand: #3155d9;
   --wpbb-jobs-ink: #0b1739;

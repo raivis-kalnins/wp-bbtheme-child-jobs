@@ -473,7 +473,7 @@ function wpbb_jobs_register_blocks() {
 add_action( 'init', 'wpbb_jobs_register_blocks', 30 );
 
 function wpbb_jobs_single_content( $content ) {
-    if ( ! in_the_loop() || ! is_main_query() ) return $content;
+    if ( ! wpbb_jobs_single_content_context_ok() ) return $content;
     if ( is_singular( 'wpbb_job' ) ) {
         $job_id = get_the_ID();
         $company = wpbb_jobs_company_for_job( $job_id );
@@ -503,3 +503,112 @@ function wpbb_jobs_single_content( $content ) {
     return $content;
 }
 add_filter( 'the_content', 'wpbb_jobs_single_content', 25 );
+
+/**
+ * v3.8.10.71: deterministic single-job renderer for block-theme templates.
+ * The generic parent index template is intentionally not used for job detail
+ * pages because its nested dynamic wrapper can lose post context on some
+ * WordPress/Gutenberg combinations.
+ */
+function wpbb_jobs_single_job_view( $job_id = 0 ) {
+    $job_id = absint( $job_id ?: get_queried_object_id() );
+    $job = get_post( $job_id );
+    if ( ! $job instanceof WP_Post || 'wpbb_job' !== $job->post_type ) {
+        return '<div class="wpbb-jobs-empty">' . esc_html__( 'This job could not be found.', 'wp-bbtheme-child' ) . '</div>';
+    }
+
+    $company  = wpbb_jobs_company_for_job( $job_id );
+    $location = wpbb_jobs_term_name( $job_id, 'wpbb_job_location' );
+    $type     = wpbb_jobs_term_name( $job_id, 'wpbb_job_type' );
+    $category = wpbb_jobs_term_name( $job_id, 'wpbb_job_category' );
+    $salary   = wpbb_jobs_salary_label( $job_id );
+    $deadline = (string) get_post_meta( $job_id, '_wpbb_job_deadline', true );
+    $remote   = (bool) get_post_meta( $job_id, '_wpbb_job_remote', true );
+    $featured = (bool) get_post_meta( $job_id, '_wpbb_job_featured', true );
+    $skills   = wp_get_post_terms( $job_id, 'wpbb_job_skill', array( 'fields' => 'names' ) );
+    if ( is_wp_error( $skills ) ) $skills = array();
+
+    $description = (string) get_post_field( 'post_content', $job_id, 'raw' );
+    $description = has_blocks( $description ) ? do_blocks( $description ) : wpautop( $description );
+
+    ob_start();
+    ?>
+    <main id="wp-theme-main" class="wpbb-jobs-single-page">
+        <section class="wp-theme-inner-hero wpbb-jobs-single-hero">
+            <div class="container">
+                <p class="wp-theme-sector-eyebrow"><?php esc_html_e( 'Job opportunity', 'wp-bbtheme-child' ); ?></p>
+                <div class="wpbb-jobs-single-hero__grid">
+                    <div>
+                        <div class="wpbb-jobs-single-hero__chips">
+                            <?php if ( $featured ) : ?><span class="wpbb-jobs-chip is-featured"><?php esc_html_e( 'Featured', 'wp-bbtheme-child' ); ?></span><?php endif; ?>
+                            <?php if ( $type ) : ?><span class="wpbb-jobs-chip"><?php echo esc_html( $type ); ?></span><?php endif; ?>
+                            <?php if ( $remote ) : ?><span class="wpbb-jobs-chip"><?php esc_html_e( 'Remote friendly', 'wp-bbtheme-child' ); ?></span><?php endif; ?>
+                        </div>
+                        <h1><?php echo esc_html( get_the_title( $job_id ) ); ?></h1>
+                        <p class="wp-theme-sector-lead"><?php echo esc_html( $job->post_excerpt ?: sprintf( __( 'Explore this opportunity with %s.', 'wp-bbtheme-child' ), $company instanceof WP_Post ? $company->post_title : get_bloginfo( 'name' ) ) ); ?></p>
+                    </div>
+                    <a class="wpbb-jobs-button wpbb-jobs-single-hero__apply" href="#apply"><?php esc_html_e( 'Apply now', 'wp-bbtheme-child' ); ?></a>
+                </div>
+            </div>
+        </section>
+        <section class="wpbb-jobs-single-body">
+            <div class="container">
+                <div class="wpbb-jobs-single-layout">
+                    <article class="wpbb-jobs-single-main">
+                        <div class="wpbb-jobs-single-meta wpbb-jobs-panel">
+                            <div class="wpbb-jobs-single-meta__company">
+                                <?php echo wpbb_jobs_company_badge( $company ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                <div><strong><?php echo esc_html( $company instanceof WP_Post ? $company->post_title : get_bloginfo( 'name' ) ); ?></strong><?php if ( $company instanceof WP_Post ) : ?><a href="<?php echo esc_url( get_permalink( $company ) ); ?>"><?php esc_html_e( 'View employer', 'wp-bbtheme-child' ); ?></a><?php endif; ?></div>
+                            </div>
+                            <div class="wpbb-jobs-single-meta__items">
+                                <?php foreach ( array_filter( array( $location, $category, $salary, $deadline ? sprintf( __( 'Apply by %s', 'wp-bbtheme-child' ), wp_date( get_option( 'date_format' ), strtotime( $deadline ) ) ) : '' ) ) as $item ) : ?><span><?php echo esc_html( $item ); ?></span><?php endforeach; ?>
+                            </div>
+                        </div>
+                        <div class="wpbb-jobs-job-description wpbb-jobs-panel">
+                            <?php echo wp_kses_post( $description ); ?>
+                            <?php if ( $skills ) : ?><div class="wpbb-jobs-job-skills"><h2><?php esc_html_e( 'Useful skills', 'wp-bbtheme-child' ); ?></h2><div><?php foreach ( $skills as $skill ) : ?><span class="wpbb-jobs-chip"><?php echo esc_html( $skill ); ?></span><?php endforeach; ?></div></div><?php endif; ?>
+                        </div>
+                    </article>
+                    <aside id="apply" class="wpbb-jobs-single-sidebar">
+                        <?php echo wpbb_jobs_apply_form( $job_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </aside>
+                </div>
+            </div>
+        </section>
+    </main>
+    <?php
+    return (string) ob_get_clean();
+}
+add_shortcode( 'wpbb_job_single', static function() { return wpbb_jobs_single_job_view(); } );
+
+/** Keep the legacy post-content enhancement usable outside the dedicated template. */
+function wpbb_jobs_single_content_context_ok() {
+    if ( ! is_singular( array( 'wpbb_job', 'wpbb_company' ) ) ) return false;
+    $queried = absint( get_queried_object_id() );
+    $current = absint( get_the_ID() );
+    return ! $queried || ! $current || $queried === $current;
+}
+
+/** Dedicated employer detail renderer so company links use the same stable block-theme route. */
+function wpbb_jobs_single_company_view( $company_id = 0 ) {
+    $company_id = absint( $company_id ?: get_queried_object_id() );
+    $company = get_post( $company_id );
+    if ( ! $company instanceof WP_Post || 'wpbb_company' !== $company->post_type ) {
+        return '<div class="wpbb-jobs-empty">' . esc_html__( 'This employer could not be found.', 'wp-bbtheme-child' ) . '</div>';
+    }
+    $website = (string) get_post_meta( $company_id, '_wpbb_company_website', true );
+    $description = (string) get_post_field( 'post_content', $company_id, 'raw' );
+    $description = has_blocks( $description ) ? do_blocks( $description ) : wpautop( $description );
+    $jobs = get_posts( array(
+        'post_type' => 'wpbb_job', 'post_status' => 'publish', 'posts_per_page' => 12,
+        'meta_key' => '_wpbb_job_company_id', 'meta_value' => $company_id,
+        'orderby' => 'date', 'order' => 'DESC',
+    ) );
+    ob_start(); ?>
+    <main id="wp-theme-main" class="wpbb-jobs-company-page">
+        <section class="wp-theme-inner-hero"><div class="container"><p class="wp-theme-sector-eyebrow"><?php esc_html_e( 'Hiring company', 'wp-bbtheme-child' ); ?></p><div class="wpbb-jobs-company-hero"><div><?php echo wpbb_jobs_company_badge( $company ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><h1><?php echo esc_html( get_the_title( $company_id ) ); ?></h1><p class="wp-theme-sector-lead"><?php echo esc_html( $company->post_excerpt ?: __( 'Employer profile and current opportunities.', 'wp-bbtheme-child' ) ); ?></p></div><?php if ( $website ) : ?><a class="wpbb-jobs-button is-secondary" href="<?php echo esc_url( $website ); ?>" rel="noopener" target="_blank"><?php esc_html_e( 'Visit website', 'wp-bbtheme-child' ); ?></a><?php endif; ?></div></div></section>
+        <section class="wpbb-jobs-single-body"><div class="container"><div class="wpbb-jobs-company-layout"><article class="wpbb-jobs-panel wpbb-jobs-job-description"><?php echo wp_kses_post( $description ); ?></article><section class="wpbb-jobs-company-openings"><div class="wp-theme-section-heading"><p class="wp-theme-sector-eyebrow"><?php esc_html_e( 'Current opportunities', 'wp-bbtheme-child' ); ?></p><h2><?php esc_html_e( 'Open roles', 'wp-bbtheme-child' ); ?></h2></div><?php if ( $jobs ) : ?><div class="wpbb-jobs-grid wpbb-jobs-grid--2"><?php foreach ( $jobs as $job ) echo wpbb_jobs_render_job_card( $job ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div><?php else : ?><div class="wpbb-jobs-empty"><?php esc_html_e( 'There are no open roles with this employer right now.', 'wp-bbtheme-child' ); ?></div><?php endif; ?></section></div></div></section>
+    </main><?php
+    return (string) ob_get_clean();
+}
+add_shortcode( 'wpbb_company_single', static function() { return wpbb_jobs_single_company_view(); } );

@@ -238,3 +238,68 @@ form label,.woocommerce form .form-row label{display:block;margin-bottom:.35rem;
   #wp-theme-main .wpbb-v62-card-grid .wpbb-icon-card .card-body{padding:22px}
 }
 
+
+/* v3.8.10.71 shared sector layout harmonisation.
+ * Keep one content width and one vertical rhythm across imported demos. */
+:root{
+  --wpbb-v71-content:1320px;
+  --wpbb-v71-section-y:clamp(56px,5vw,80px);
+  --wpbb-v71-section-y-small:clamp(40px,4vw,60px);
+  --wpbb-v71-card-gap:clamp(18px,2vw,28px);
+}
+#wp-theme-main .container,
+#wp-theme-main .wpbb-row.container{
+  width:100%;max-width:var(--wpbb-content,var(--wpbb-v71-content));margin-inline:auto;
+  padding-inline:clamp(18px,2.4vw,32px)
+}
+#wp-theme-main .wp-theme-section-shell{margin:0;padding-block:var(--wpbb-v71-section-y)}
+#wp-theme-main .wp-theme-inner-hero{margin:0;padding-block:clamp(52px,5vw,76px)}
+#wp-theme-main .wp-theme-section-heading{margin-bottom:clamp(28px,3vw,42px)}
+#wp-theme-main .wp-theme-section-heading h1,
+#wp-theme-main .wp-theme-section-heading h2,
+#wp-theme-main .wp-theme-inner-hero h1{max-width:900px}
+#wp-theme-main .wp-theme-section-heading p:last-child,
+#wp-theme-main .wp-theme-inner-hero p:last-child{margin-bottom:0}
+#wp-theme-main .wpbb-v62-card-grid,
+#wp-theme-main .wp-theme-home-stats .wpbb-row{row-gap:var(--wpbb-v71-card-gap)}
+#wp-theme-main .wpbb-v62-card-grid>.wpbb-column,
+#wp-theme-main .wp-theme-home-stats .wpbb-column{display:flex;align-items:stretch;min-width:0}
+#wp-theme-main .wpbb-v62-card-grid .wpbb-icon-card,
+#wp-theme-main .wp-theme-home-stats .wpbb-fun-fact{width:100%;height:100%}
+#wp-theme-main .wpbb-icon-card .card-body{display:flex;flex-direction:column;height:100%}
+#wp-theme-main .wpbb-icon-card__action{margin-top:auto}
+#wp-theme-main .wp-theme-sector-media-text{align-items:flex-start}
+#wp-theme-main .wp-theme-sector-media-text__media{margin:0;width:100%;overflow:hidden}
+#wp-theme-main .wp-theme-sector-media-text__media img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:center}
+#wp-theme-main .wp-block-details{max-width:100%}
+#wp-theme-main .wp-theme-contact-section .wpbb-row{row-gap:clamp(24px,3vw,42px)}
+#wp-theme-main .wp-theme-contact-form,
+#wp-theme-main .wpbb-dynamic-form{max-width:100%}
+@media(max-width:767.98px){
+  :root{--wpbb-v71-section-y:52px;--wpbb-v71-section-y-small:38px}
+  #wp-theme-main .container,#wp-theme-main .wpbb-row.container{padding-inline:18px}
+  #wp-theme-main .wp-theme-inner-hero{padding-block:44px}
+  #wp-theme-main .wp-theme-sector-media-text__media img{aspect-ratio:16/11}
+}
+
+/* WooCommerce block controls: generic form rules must never enlarge tiny
+ * checkboxes, filter chips or reset controls. */
+.woocommerce .wc-block-components-checkbox,
+.woocommerce-page .wc-block-components-checkbox{display:flex;align-items:center;gap:.55rem}
+.woocommerce .wc-block-components-checkbox input[type="checkbox"],
+.woocommerce-page .wc-block-components-checkbox input[type="checkbox"],
+.wc-block-product-filters input[type="checkbox"],
+.wc-block-product-filter-checkbox-list input[type="checkbox"]{
+  flex:0 0 18px;width:18px;min-width:18px;max-width:18px;height:18px;min-height:18px;margin:0;padding:0
+}
+.wc-block-product-filters button,
+.wc-block-product-filter-removable-chips button,
+.wc-block-components-filter-reset-button{width:auto;min-width:0}
+.wc-block-product-filter-removable-chips__clear-all,
+.wc-block-product-filter-chips__clear-all{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:.4rem .7rem}
+.wc-block-product-filters .wc-block-components-form-token-field__input-container,
+.wc-block-product-filters .wc-block-components-combobox .wc-block-components-combobox-control input{min-height:44px}
+.woocommerce ul.products li.product,
+.woocommerce-page ul.products li.product{min-width:0;overflow:hidden}
+.woocommerce ul.products li.product .button,
+.woocommerce-page ul.products li.product .button{width:100%;text-align:center;justify-content:center}
