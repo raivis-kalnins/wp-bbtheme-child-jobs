@@ -1,3 +1,10 @@
+## 3.8.10.74
+
+- Suite-wide spacing, directory-card and header-action alignment cleanup.
+- Sector media repair reruns against the current bundled assets.
+- WooCommerce catalogue, product, cart, checkout and account presentation now follows the active sector palette.
+- Managed demo products from other sectors are removed without touching unmarked real products.
+
 # Changelog
 
 ## 3.8.10.73

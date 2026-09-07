@@ -1,6 +1,6 @@
 <?php
 /**
- * Shared v3.8.10.73 BBuilder demo/admin consistency layer.
+ * Shared v3.8.10.74 BBuilder demo/admin consistency layer.
  *
  * Goals:
  * - BBuilder Row/Column are the only grid primitives.
@@ -738,7 +738,7 @@ if ( ! function_exists( 'wpbb_child_v71_sync_managed_translations' ) ) {
 
 if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
     /**
-     * v3.8.10.73 canonical demo repair.
+     * v3.8.10.74 canonical demo repair.
      *
      * Older child releases rebuilt the English source at priority 999 with a
      * compact BBuilder fallback. Polylang had already copied the richer parent
@@ -753,24 +753,24 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
         $front      = absint( get_option( 'page_on_front' ) );
         $front_content = $front ? (string) get_post_field( 'post_content', $front, 'raw' ) : '';
         $placeholder = $front && wpbb_child_v62_has_placeholder_dynamic_blocks( $front_content );
-        $already = '3.8.10.73' === (string) get_option( $done_key );
+        $already = '3.8.10.75' === (string) get_option( $done_key );
         if ( ! $force && ! $placeholder && $already ) return;
 
         $profile = wpbb_child_v71_demo_profile();
         if ( empty( $profile['id'] ) ) {
-            update_option( $done_key, '3.8.10.73', false );
+            update_option( $done_key, '3.8.10.75', false );
             return;
         }
 
         $source_ids = array();
 
         if ( $front && wpbb_child_v62_is_managed_demo_page( $front ) && wpbb_child_v71_is_source_language( $front ) ) {
-            $needs_refresh = $force || $placeholder || '3.8.10.73' !== (string) get_post_meta( $front, '_wpbb_child_bbuilder_version', true );
+            $needs_refresh = $force || $placeholder || '3.8.10.75' !== (string) get_post_meta( $front, '_wpbb_child_bbuilder_version', true );
             if ( $needs_refresh ) {
                 $clean = wpbb_child_v71_canonical_home_content( $profile );
                 if ( '' !== trim( $clean ) ) {
                     wp_update_post( array( 'ID' => $front, 'post_content' => $clean ) );
-                    update_post_meta( $front, '_wpbb_child_bbuilder_version', '3.8.10.73' );
+                    update_post_meta( $front, '_wpbb_child_bbuilder_version', '3.8.10.75' );
                     update_post_meta( $front, '_wp_theme_demo_managed', '1' );
                     clean_post_cache( $front );
                 }
@@ -781,12 +781,12 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
         foreach ( array( 'about', 'services', 'industries', 'contact' ) as $slug ) {
             $page = get_page_by_path( $slug );
             if ( ! $page instanceof WP_Post || ! wpbb_child_v62_is_managed_demo_page( $page->ID ) || ! wpbb_child_v71_is_source_language( $page->ID ) ) continue;
-            $needs_refresh = $force || '3.8.10.73' !== (string) get_post_meta( $page->ID, '_wpbb_child_bbuilder_version', true );
+            $needs_refresh = $force || '3.8.10.75' !== (string) get_post_meta( $page->ID, '_wpbb_child_bbuilder_version', true );
             if ( $needs_refresh ) {
                 $clean = wpbb_child_v71_canonical_page_content( $slug, $profile );
                 if ( '' !== trim( $clean ) ) {
                     wp_update_post( array( 'ID' => $page->ID, 'post_content' => $clean ) );
-                    update_post_meta( $page->ID, '_wpbb_child_bbuilder_version', '3.8.10.73' );
+                    update_post_meta( $page->ID, '_wpbb_child_bbuilder_version', '3.8.10.75' );
                     update_post_meta( $page->ID, '_wp_theme_demo_managed', '1' );
                     clean_post_cache( $page->ID );
                 }
@@ -797,7 +797,7 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
         // Starter Setup owns translation generation. Existing localized demo pages
         // are deliberately left intact here because they may already contain
         // better human/edited translations than the shared phrase dictionary.
-        update_option( $done_key, '3.8.10.73', false );
+        update_option( $done_key, '3.8.10.75', false );
     }
     add_action( 'admin_init', 'wpbb_child_v62_rebuild_demo_pages', 80 );
 }

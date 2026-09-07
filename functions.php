@@ -311,3 +311,5 @@ function wpbb_jobs_mega_menu_definitions( $definitions, $profile ) {
     return $definitions;
 }
 add_filter( 'wp_theme_demo_mega_menu_definitions', 'wpbb_jobs_mega_menu_definitions', 20, 2 );
+// v3.8.10.75 structural/media/Woo repair.
+require_once get_stylesheet_directory() . '/inc/v75-suite.php';
