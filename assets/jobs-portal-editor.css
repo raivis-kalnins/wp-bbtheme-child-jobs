@@ -1,0 +1,19 @@
+.editor-styles-wrapper {
+  --wpbb-jobs-brand: #3155d9;
+  --wpbb-jobs-ink: #0b1739;
+  --wpbb-jobs-border: #dce4f0;
+  --wpbb-jobs-soft: #f6f8fc;
+}
+.editor-styles-wrapper .wpbb-jobs-section { padding-block: 48px; }
+.editor-styles-wrapper .wpbb-jobs-section.bg-light { background: var(--wpbb-jobs-soft); }
+.editor-styles-wrapper .wpbb-jobs-search-band { border-block: 1px dashed var(--wpbb-jobs-border); }
+.editor-styles-wrapper .wpbb-jobs-portal-page-title { color: var(--wpbb-jobs-ink); }
+.editor-styles-wrapper [data-type^="wpbb-jobs/"] {
+  border: 1px dashed #c7d3e7;
+  border-radius: 14px;
+  background: #fff;
+  padding: 8px;
+}
+.editor-styles-wrapper [data-type^="wpbb-jobs/"] .wpbb-jobs-card,
+.editor-styles-wrapper [data-type^="wpbb-jobs/"] .wpbb-jobs-company-card,
+.editor-styles-wrapper [data-type^="wpbb-jobs/"] .wpbb-jobs-resume-card { box-sizing: border-box; }
