@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.8.10.73
+
+- Removed the redundant candidate/employer pathway Icon Card section from the Jobs homepage.
+- Forced one managed-demo homepage refresh so existing placeholder cards are removed after upgrade.
+- Kept all candidate/employer routes available through navigation, recruitment sections and dashboards.
+
 ## 3.8.10.72
 
 - Repaired the managed English demo from the parent canonical rich sector content instead of the old compact fallback serializer.
