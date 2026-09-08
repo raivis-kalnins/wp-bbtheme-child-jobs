@@ -62,7 +62,7 @@ function wpbb_jobs_setup_admin_page() {
     if ( ! current_user_can( 'manage_options' ) ) return;
     $notice = get_transient( 'wpbb_jobs_setup_notice_' . get_current_user_id() );
     if ( $notice ) delete_transient( 'wpbb_jobs_setup_notice_' . get_current_user_id() );
-    $pages = array( 'jobs', 'hiring-companies', 'find-candidates', 'candidate-dashboard', 'employer-dashboard', 'post-a-job', 'create-resume', 'login-register' );
+    $pages = array( 'jobs', 'hiring-companies', 'find-candidates', 'candidate-dashboard', 'employer-dashboard', 'post-a-job', 'create-resume', 'login-register', 'salary-guide', 'home-2' );
     $ready = 0;
     foreach ( $pages as $slug ) if ( get_page_by_path( $slug, OBJECT, 'page' ) ) $ready++;
     ?>
@@ -88,6 +88,8 @@ function wpbb_jobs_settings_page() {
         <form class="wpbb-jobs-admin__settings" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="wpbb_jobs_save_settings" /><?php wp_nonce_field( 'wpbb_jobs_save_settings' ); ?>
             <section class="wpbb-jobs-admin__card"><h2><?php esc_html_e( 'Publishing & applications', 'wp-bbtheme-child' ); ?></h2><label><input type="checkbox" name="job_approval" value="1" <?php checked( ! empty( $settings['job_approval'] ) ); ?> /> <?php esc_html_e( 'Require administrator approval before employer-submitted jobs are published', 'wp-bbtheme-child' ); ?></label><label><input type="checkbox" name="company_approval" value="1" <?php checked( ! empty( $settings['company_approval'] ) ); ?> /> <?php esc_html_e( 'Require administrator approval for new company profiles', 'wp-bbtheme-child' ); ?></label><label><input type="checkbox" name="guest_apply" value="1" <?php checked( ! empty( $settings['guest_apply'] ) ); ?> /> <?php esc_html_e( 'Allow visitors to quick-apply without creating a candidate account', 'wp-bbtheme-child' ); ?></label></section>
             <section class="wpbb-jobs-admin__card"><h2><?php esc_html_e( 'Defaults', 'wp-bbtheme-child' ); ?></h2><label><?php esc_html_e( 'Salary currency', 'wp-bbtheme-child' ); ?><input type="text" name="currency" maxlength="3" value="<?php echo esc_attr( $settings['currency'] ); ?>" /></label><label><?php esc_html_e( 'Recruitment notification email', 'wp-bbtheme-child' ); ?><input type="email" class="regular-text" name="admin_email" value="<?php echo esc_attr( $settings['admin_email'] ); ?>" /></label></section>
+            <section class="wpbb-jobs-admin__card"><h2><?php esc_html_e( 'LinkedIn sign-in', 'wp-bbtheme-child' ); ?></h2><label><input type="checkbox" name="linkedin_enabled" value="1" <?php checked( ! empty( $settings['linkedin_enabled'] ) ); ?> /> <?php esc_html_e( 'Enable optional candidate sign-in with LinkedIn OpenID Connect', 'wp-bbtheme-child' ); ?></label><label><?php esc_html_e( 'LinkedIn Client ID', 'wp-bbtheme-child' ); ?><input type="text" class="regular-text" name="linkedin_client_id" value="<?php echo esc_attr( $settings['linkedin_client_id'] ); ?>" autocomplete="off" /></label><label><?php esc_html_e( 'LinkedIn Client Secret', 'wp-bbtheme-child' ); ?><input type="password" class="regular-text" name="linkedin_client_secret" value="<?php echo esc_attr( $settings['linkedin_client_secret'] ); ?>" autocomplete="new-password" /></label><p><strong><?php esc_html_e( 'Authorized redirect URL:', 'wp-bbtheme-child' ); ?></strong><br><code><?php echo esc_html( function_exists( 'wpbb_jobs_linkedin_callback_url' ) ? wpbb_jobs_linkedin_callback_url() : rest_url( 'wpbb-jobs/v1/linkedin/callback' ) ); ?></code></p><p class="description"><?php esc_html_e( 'Standard LinkedIn OpenID Connect can prefill name, email and profile picture. Full LinkedIn CV/work-history import requires additional LinkedIn API access and is not assumed here.', 'wp-bbtheme-child' ); ?></p></section>
+            <section class="wpbb-jobs-admin__card"><h2><?php esc_html_e( 'CRM / ATS webhook', 'wp-bbtheme-child' ); ?></h2><label><?php esc_html_e( 'Webhook URL', 'wp-bbtheme-child' ); ?><input type="url" class="regular-text" name="crm_webhook_url" value="<?php echo esc_attr( $settings['crm_webhook_url'] ); ?>" placeholder="https://crm.example.com/hooks/jobs" /></label><label><?php esc_html_e( 'Webhook signing secret', 'wp-bbtheme-child' ); ?><input type="password" class="regular-text" name="crm_webhook_secret" value="<?php echo esc_attr( $settings['crm_webhook_secret'] ); ?>" autocomplete="new-password" /></label><p class="description"><?php esc_html_e( 'When configured, new applications and status changes are sent as JSON. The optional secret signs each request with an HMAC SHA-256 signature.', 'wp-bbtheme-child' ); ?></p></section>
             <?php submit_button( __( 'Save HR Jobs settings', 'wp-bbtheme-child' ) ); ?>
         </form>
     </div>
@@ -100,9 +102,14 @@ function wpbb_jobs_handle_save_settings() {
     update_option( 'wpbb_jobs_settings', array(
         'job_approval'     => empty( $_POST['job_approval'] ) ? 0 : 1,
         'company_approval' => empty( $_POST['company_approval'] ) ? 0 : 1,
-        'guest_apply'      => empty( $_POST['guest_apply'] ) ? 0 : 1,
-        'currency'         => strtoupper( substr( sanitize_text_field( wp_unslash( $_POST['currency'] ?? 'GBP' ) ), 0, 3 ) ),
-        'admin_email'      => sanitize_email( wp_unslash( $_POST['admin_email'] ?? get_option( 'admin_email' ) ) ),
+        'guest_apply'            => empty( $_POST['guest_apply'] ) ? 0 : 1,
+        'currency'               => strtoupper( substr( sanitize_text_field( wp_unslash( $_POST['currency'] ?? 'GBP' ) ), 0, 3 ) ),
+        'admin_email'            => sanitize_email( wp_unslash( $_POST['admin_email'] ?? get_option( 'admin_email' ) ) ),
+        'linkedin_enabled'       => empty( $_POST['linkedin_enabled'] ) ? 0 : 1,
+        'linkedin_client_id'     => sanitize_text_field( wp_unslash( $_POST['linkedin_client_id'] ?? '' ) ),
+        'linkedin_client_secret' => sanitize_text_field( wp_unslash( $_POST['linkedin_client_secret'] ?? '' ) ),
+        'crm_webhook_url'        => esc_url_raw( wp_unslash( $_POST['crm_webhook_url'] ?? '' ) ),
+        'crm_webhook_secret'     => sanitize_text_field( wp_unslash( $_POST['crm_webhook_secret'] ?? '' ) ),
     ) );
     wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( 'admin.php?page=wpbb-jobs-settings' ) ) );
     exit;
@@ -191,12 +198,16 @@ function wpbb_jobs_save_admin_meta( $post_id, $post ) {
         update_post_meta( $post_id, '_wpbb_resume_headline', sanitize_text_field( wp_unslash( $_POST['wpbb_resume_headline'] ?? '' ) ) );
         update_post_meta( $post_id, '_wpbb_resume_phone', sanitize_text_field( wp_unslash( $_POST['wpbb_resume_phone'] ?? '' ) ) );
         update_post_meta( $post_id, '_wpbb_resume_availability', sanitize_text_field( wp_unslash( $_POST['wpbb_resume_availability'] ?? '' ) ) );
+        update_post_meta( $post_id, '_wpbb_resume_current_role', sanitize_text_field( wp_unslash( $_POST['wpbb_resume_current_role'] ?? '' ) ) );
     } elseif ( 'wpbb_application' === $post->post_type ) {
         $status = sanitize_key( wp_unslash( $_POST['wpbb_application_status'] ?? 'new' ) );
         $old_status = get_post_meta( $post_id, '_wpbb_application_status', true ) ?: 'new';
         if ( isset( wpbb_jobs_application_statuses()[ $status ] ) ) {
             update_post_meta( $post_id, '_wpbb_application_status', $status );
-            if ( $status !== $old_status ) wpbb_jobs_send_status_email( $post_id, $status );
+            if ( $status !== $old_status ) {
+                wpbb_jobs_send_status_email( $post_id, $status );
+                do_action( 'wpbb_jobs_application_status_changed', $post_id, $status );
+            }
         }
     }
 }

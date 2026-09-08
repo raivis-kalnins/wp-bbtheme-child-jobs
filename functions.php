@@ -8,6 +8,11 @@ require_once __DIR__ . '/inc/jobs-core.php';
 require_once __DIR__ . '/inc/jobs-render.php';
 require_once __DIR__ . '/inc/jobs-portal-integration.php';
 require_once __DIR__ . '/inc/jobs-admin.php';
+require_once __DIR__ . '/inc/jobs-v84-polish.php';
+require_once __DIR__ . '/inc/jobs-v85-upgrade.php';
+require_once __DIR__ . '/inc/jobs-v86-finish.php';
+require_once __DIR__ . '/inc/jobs-v87-design.php';
+require_once __DIR__ . '/inc/jobs-v88-finish.php';
 
 function wpbb_jobs_project_mode( $mode ) {
     return 'jobs';
@@ -16,7 +21,7 @@ add_filter( 'wp_theme_project_mode', 'wpbb_jobs_project_mode' );
 
 
 function wpbb_jobs_theme_color( $color, $stylesheet ) {
-    return get_stylesheet() === $stylesheet ? '#3155d9' : $color;
+    return get_stylesheet() === $stylesheet ? '#078f6a' : $color;
 }
 add_filter( 'wp_theme_project_theme_color', 'wpbb_jobs_theme_color', 20, 2 );
 
@@ -36,7 +41,7 @@ function wpbb_jobs_enqueue_sector_assets() {
         true
     );
     if ( function_exists( 'wp_theme_sector_customizer_css' ) ) {
-        wp_add_inline_style( 'wpbb-jobs-sector-base', wp_theme_sector_customizer_css( '#3155d9', '18px', '--sector-primary', '--sector-radius' ) );
+        wp_add_inline_style( 'wpbb-jobs-sector-base', wp_theme_sector_customizer_css( '#078f6a', '18px', '--sector-primary', '--sector-radius' ) );
     }
 }
 add_action( 'wp_enqueue_scripts', 'wpbb_jobs_enqueue_sector_assets', 30 );
@@ -47,6 +52,18 @@ function wpbb_jobs_enqueue_assets() {
         'wpbb-jobs-portal',
         get_stylesheet_directory_uri() . '/assets/jobs-portal.css',
         array( 'wpbb-jobs-sector-base' ),
+        $version
+    );
+    wp_enqueue_style(
+        'wpbb-jobs-v84',
+        get_stylesheet_directory_uri() . '/assets/jobs-v84.css',
+        array( 'wpbb-jobs-portal' ),
+        $version
+    );
+    wp_enqueue_style(
+        'wpbb-jobs-v85',
+        get_stylesheet_directory_uri() . '/assets/jobs-v85.css',
+        array( 'wpbb-jobs-v84' ),
         $version
     );
     wp_enqueue_script(
@@ -115,10 +132,10 @@ function wpbb_jobs_demo_profile( $profile ) {
 
     $profile['hero_title'] = __( 'Find work that fits. Hire people who move the business forward.', 'wp-bbtheme-child' );
     $profile['hero_text']  = __( 'A joined-up recruitment experience for candidates exploring their next move and employers building stronger teams.', 'wp-bbtheme-child' );
-    $profile['primary_label'] = __( 'Search jobs', 'wp-bbtheme-child' );
-    $profile['primary_url']   = wpbb_jobs_page_url( 'jobs' );
-    $profile['secondary_label'] = __( 'Hire talent', 'wp-bbtheme-child' );
-    $profile['secondary_url']   = wpbb_jobs_page_url( 'services' );
+    $profile['primary_label'] = __( 'Post a job', 'wp-bbtheme-child' );
+    $profile['primary_url']   = wpbb_jobs_page_url( 'post-a-job' );
+    $profile['secondary_label'] = __( 'Find a job', 'wp-bbtheme-child' );
+    $profile['secondary_url']   = wpbb_jobs_page_url( 'jobs' );
 
     $profile['services_eyebrow'] = __( 'For employers', 'wp-bbtheme-child' );
     $profile['services_heading'] = __( 'Recruitment tools that keep the hiring team focused on good decisions.', 'wp-bbtheme-child' );
@@ -170,19 +187,19 @@ function wpbb_jobs_demo_profile( $profile ) {
     );
 
     $profile['palette'] = array(
-        'theme_brand_color'       => '#3155d9',
-        'theme_accent_color'      => '#19a7ce',
-        'theme_text_color'        => '#23304d',
-        'theme_heading_color'     => '#0b1739',
-        'theme_background_color'  => '#f6f8fc',
+        'theme_brand_color'       => '#078f6a',
+        'theme_accent_color'      => '#0caf80',
+        'theme_text_color'        => '#29415f',
+        'theme_heading_color'     => '#10254c',
+        'theme_background_color'  => '#f7fbfa',
         'theme_surface_color'     => '#ffffff',
-        'theme_surface_alt_color' => '#eef3fb',
-        'theme_border_color'      => '#dce4f0',
-        'theme_grey_dark_color'   => '#5d6a82',
-        'theme_grey_light_color'  => '#eef3fb',
-        'theme_success_color'     => '#167c5a',
-        'theme_link_color'        => '#3155d9',
-        'theme_link_hover_color'  => '#233fa9',
+        'theme_surface_alt_color' => '#eef8f5',
+        'theme_border_color'      => '#dce9e5',
+        'theme_grey_dark_color'   => '#607487',
+        'theme_grey_light_color'  => '#eef8f5',
+        'theme_success_color'     => '#078f6a',
+        'theme_link_color'        => '#08765c',
+        'theme_link_hover_color'  => '#056b54',
         'theme_radius'            => '18px',
         'theme_font_provider'     => 'system',
         'theme_body_font'         => "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -278,10 +295,29 @@ add_filter( 'wp_theme_demo_profile', 'wpbb_jobs_demo_profile', 20 );
 function wpbb_jobs_navigation_items( $items, $profile ) {
     if ( ( $profile['id'] ?? '' ) !== 'jobs' ) return $items;
 
+    // Keep the desktop navigation calm and useful in longer languages. About
+    // and Contact stay in the utility/footer menus, while Salary Guide sits
+    // under the candidate journey instead of consuming another top-level slot.
+    foreach ( $items as &$item ) {
+        $key = sanitize_key( (string) ( $item['key'] ?? '' ) );
+        if ( 'about' === $key || 'contact' === $key ) {
+            $item['locations'] = array( 'footer', 'top' );
+        } elseif ( 'services' === $key || 'industries' === $key || 'blog' === $key || 'home' === $key ) {
+            $item['locations'] = array( 'header', 'footer' );
+        }
+    }
+    unset( $item );
+
     $jobs = array( 'key' => 'jobs', 'title' => __( 'Jobs', 'wp-bbtheme-child' ), 'slug' => 'jobs', 'locations' => array( 'header', 'footer' ) );
     $companies = array( 'key' => 'companies', 'title' => __( 'Companies', 'wp-bbtheme-child' ), 'slug' => 'hiring-companies', 'locations' => array( 'header', 'footer' ) );
-    $salary = array( 'key' => 'salary-guide', 'title' => __( 'Salary Guide', 'wp-bbtheme-child' ), 'slug' => 'salary-guide', 'locations' => array( 'header', 'footer' ) );
-    array_splice( $items, 1, 0, array( $jobs, $companies, $salary ) );
+    array_splice( $items, 1, 0, array( $jobs, $companies ) );
+
+    // Useful secondary destinations live in submenus/footer rather than the
+    // desktop top line. Parent menu creation understands parent_key.
+    $items[] = array( 'key' => 'salary-guide', 'parent_key' => 'industries', 'title' => __( 'Salary Guide', 'wp-bbtheme-child' ), 'slug' => 'salary-guide', 'locations' => array( 'header', 'footer' ) );
+    $items[] = array( 'key' => 'post-a-job', 'title' => __( 'Post a Job', 'wp-bbtheme-child' ), 'slug' => 'post-a-job', 'locations' => array( 'footer' ) );
+    $items[] = array( 'key' => 'candidate-dashboard', 'title' => __( 'Candidate Dashboard', 'wp-bbtheme-child' ), 'slug' => 'candidate-dashboard', 'locations' => array( 'footer' ) );
+    $items[] = array( 'key' => 'employer-dashboard', 'title' => __( 'Employer Dashboard', 'wp-bbtheme-child' ), 'slug' => 'employer-dashboard', 'locations' => array( 'footer' ) );
     return $items;
 }
 add_filter( 'wp_theme_demo_navigation_items', 'wpbb_jobs_navigation_items', 20, 2 );
@@ -324,3 +360,9 @@ function wpbb_jobs_mega_menu_definitions( $definitions, $profile ) {
 add_filter( 'wp_theme_demo_mega_menu_definitions', 'wpbb_jobs_mega_menu_definitions', 20, 2 );
 // v3.8.10.75 structural/media/Woo repair.
 require_once get_stylesheet_directory() . '/inc/v75-suite.php';
+
+// v3.8.10.82: repair duplicated managed Jobs/Polylang menus.
+require_once get_stylesheet_directory() . '/inc/jobs-menu-repair-v82.php';
+
+// v3.8.10.81: keep interactive wp-admin saves/updates fast.
+require_once get_stylesheet_directory() . '/inc/admin-performance.php';

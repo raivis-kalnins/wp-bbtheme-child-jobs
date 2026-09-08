@@ -12,8 +12,8 @@
 }
 .wpbb-jobs-admin__hero h1 { margin: 3px 0 8px; font-size: 30px; line-height: 1.15; color: #0b1739; }
 .wpbb-jobs-admin__hero p { max-width: 720px; margin: 0; color: #4f5f79; font-size: 15px; }
-.wpbb-jobs-admin__eyebrow { color: #3155d9 !important; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 11px !important; }
-.wpbb-jobs-admin__version { padding: 7px 10px; border-radius: 999px; background: #eef3ff; color: #3155d9; font-weight: 700; }
+.wpbb-jobs-admin__eyebrow { color: #078f6a !important; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 11px !important; }
+.wpbb-jobs-admin__version { padding: 7px 10px; border-radius: 999px; background: #eff9f6; color: #078f6a; font-weight: 700; }
 .wpbb-jobs-admin__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .wpbb-jobs-admin__card, .wpbb-jobs-admin__next {
   padding: 22px;
@@ -51,6 +51,6 @@
 .wpbb-jobs-application-meta select { margin-left:8px; }
 .wpbb-jobs-admin-status { display:inline-flex; padding:4px 8px; border-radius:999px; background:#eef3fb; color:#23304d; font-size:11px; font-weight:700; }
 .wpbb-jobs-admin-status:is(.is-hired,.is-offered) { background:#e9f8f1; color:#167c5a; }
-.wpbb-jobs-admin-status:is(.is-shortlisted,.is-interview) { background:#eef3ff; color:#3155d9; }
+.wpbb-jobs-admin-status:is(.is-shortlisted,.is-interview) { background:#eff9f6; color:#078f6a; }
 @media (max-width: 960px) { .wpbb-jobs-admin__stats { grid-template-columns:repeat(2,minmax(0,1fr)); } .wpbb-jobs-meta-grid { grid-template-columns:1fr 1fr; } }
 @media (max-width: 782px) { .wpbb-jobs-admin__stats, .wpbb-jobs-meta-grid { grid-template-columns:1fr; } }

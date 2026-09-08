@@ -1,22 +1,53 @@
-# WP BBTheme Child Jobs 3.8.10.80
+# WP BBTheme Child Jobs 3.8.10.88
 
-## 3.8.10.80 multilingual parity + layout release
+## 3.8.10.88 live-layout correction
 
-This release keeps the integrated recruitment engine self-contained and makes the managed Jobs demo visually and structurally consistent in **English plus 13 translated languages**. Starter Setup-managed translated pages are rebuilt from the same search-led homepage serializer, so they keep the same images, BBuilder structure, section widths, responsive grids and salary tools as English.
+This pass fixes the issues visible in the live-page screenshot rather than adding another cosmetic layer. The public header, homepage sections, newsletter and footer now use a wider 1400px desktop canvas instead of the older narrow demo width. The Homepage 1 hero uses the supplied woman/city artwork as an integrated right-hand visual with a soft blend into the copy area, while the hero search is simplified visually to keyword + location + green action like the reference.
 
-Supported demo languages: **EN, DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS**. Demo-facing headings, navigation, categories, job types, sample vacancies/descriptions, employer summaries, salary planner/calculator labels, candidate/employer routes, career advice and footer labels are localised. User-created content is not overwritten.
+The header now has a dedicated **Post a job** CTA and account icon, so **Career advice** is no longer incorrectly styled as the green last-menu button. The child theme also fixes the literal `\n` characters that were being printed before the header by the previous favicon hook.
 
-The Jobs homepage is now search-led rather than brochure-led: vacancy search appears in the hero, followed by category discovery, active employers, salary benchmarks/calculator, current jobs, candidate/employer routes and career advice. The salary figures shown in the demo salary guide are calculated from published demo vacancies on the site; the take-home calculator is an illustrative PAYE estimate and is not financial or tax advice.
+Public Jobs forms get cleaner file inputs and a dedicated legal-notice row. The footer subscription form is normalised to one email row plus the required consent checkbox underneath, and the redundant parent-theme generic form notice is suppressed only inside the newsletter form. When both parent and BBuilder cookie banners are present, the simpler duplicate BBuilder banner is hidden.
 
-Starter Setup-managed Polylang versions now use the **same homepage structure and presentation** as English. The theme ships starter UI/content translations for `de`, `es`, `fr`, `pl`, `ru`, `lv`, `lt`, `et`, `da`, `sv`, `nb`, `fi` and `is`, and localises the managed internal links for each language. Existing editor-created translations that are not owned by Starter Setup remain protected.
+For hCaptcha, production-host detection now also checks forwarded/original host headers, which prevents a reverse-proxied live domain from inheriting localhost test credentials. Genuine localhost still uses hCaptcha's official test mode.
 
-A self-contained **HR / Jobs / recruitment** child theme for the WP BBTheme suite. The recruitment engine is integrated directly into the child theme, so **WP Job Portal is not required**.
+Dark mode is rebalanced around deep teal surfaces, mint links and green actions, and inherited BBuilder/Bootstrap primary variables are overridden so royal-blue controls do not leak back into the Jobs theme.
+
+
+## 3.8.10.86 final visual + public-form security pass
+
+This release finishes the visual system around the supplied Jobs marketplace preview: a new Jobs logo/favicon set, green/teal primary UI instead of inherited blue controls, a stronger search-led homepage hero, six-card category row, simplified salary calculator section, four-card featured-jobs row, matching inner-page surfaces and a white footer under the green newsletter band. The homepage still includes **“One marketplace, two clear journeys”** and Homepage 2 remains the high-volume recruitment demo.
+
+The footer subscription form is now explicitly styled for **WP Newsletter Campaigns**, including its required privacy-consent checkbox and hCaptcha modal. The theme uses the hCaptcha configuration already stored by **WP BBuilder** as the single captcha source. For cloned databases, it disables the newsletter plugin's automatic public test-key substitution when the incoming browser request is on a real hostname but WordPress still reports a localhost URL, avoiding the red “testing only” widget seen in the supplied screenshots. Genuine localhost requests retain the plugin's normal test mode. No hCaptcha secret is copied into theme files.
+
+Anonymous Jobs account registration, the public Jobs sign-in form, guest job applications and the Homepage 2 qualifying form now open the same theme-styled hCaptcha modal and perform server-side verification before processing. Native WP BBuilder forms continue to use WP BBuilder's own captcha integration.
+
+The new homepage/captcha/footer-facing strings are included in the existing 14-language demo system (EN plus DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS).
+
+## 3.8.10.85 marketplace + high-volume hiring upgrade
+
+This package continues the archived Jobs Theme upgrade as a self-contained child-theme release. It keeps the existing WordPress-native recruitment engine, rebuilds the public Jobs experience toward the supplied green marketplace preview and preserves the homepage **“One marketplace, two clear journeys”** candidate/employer section.
+
+The standard homepage remains the broader jobs marketplace. A second managed page, **Homepage 2 / High-volume Hiring Demo**, is designed for repeat recruitment: a strong qualifying introduction and CTA, job filters, stable A/B landing-page variants, an employer pipeline and optional CRM webhook delivery. Both managed journeys participate in the theme's multilingual Polylang synchronisation.
+
+Supported demo languages remain **EN, DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS**. The new high-volume page and core new UI labels include starter translations for the same language set. User-created content is not overwritten.
+
+### LinkedIn and CV profile flow
+
+Optional LinkedIn sign-in uses **OpenID Connect**. It can match/create a candidate account from the LinkedIn subject/email and prefill the display name and profile image returned by LinkedIn. The normal OpenID Connect profile does **not** provide a complete LinkedIn employment-history/CV export, so the theme combines LinkedIn identity/photo prefill with its own structured CV builder and uploaded CV document. Full LinkedIn work-history import would require separate LinkedIn API product access/permissions.
+
+The CV builder now includes profile image, headline, phone, availability, current role/employer, category, location, skills, website, LinkedIn profile URL, languages, summary, work experience, education and a PDF/DOC/DOCX upload. DOCX files can best-effort seed the editable profile text when PHP `ZipArchive` is available.
+
+### High-volume hiring and CRM
+
+`[wpbb_jobs_high_volume_home]` powers Homepage 2. Visitors are deterministically assigned to variant A or B; QA can force a variant with `?jobs_variant=a` or `?jobs_variant=b`. The qualifying form routes into the existing Jobs results using the existing keyword, location and job-type filters.
+
+The employer dashboard now includes a visual application pipeline. An optional CRM webhook can receive JSON when an application is created or its status changes. If a webhook signing secret is configured, the theme adds an `X-WPBB-Jobs-Signature` HMAC SHA-256 signature.
 
 ## Recommended installation order
 
 1. Install and activate the **WP BBTheme** parent theme.
 2. Install and activate **WP BBuilder 5.6.8 or newer**.
-3. Install and activate **WP BBTheme Child Jobs 3.8.10.80**.
+3. Install and activate **WP BBTheme Child Jobs 3.8.10.88**.
 4. Open **HR Jobs → Setup & Demo** (or **Appearance → HR Jobs Setup**).
 5. Run the parent **Starter Setup / Import active child-theme demo**. The Jobs theme now automatically seeds the recruitment marketplace as part of the same import.
 6. Use **HR Jobs → Setup & Demo → Add / repair HR demo data** only when you want to repair/reseed the integrated recruitment records without rebuilding the whole site demo.
@@ -72,6 +103,7 @@ The setup screen can safely create or refresh these pages:
 - `/create-resume/`
 - `/login-register/`
 - `/salary-guide/` — salary benchmarks and take-home pay calculator
+- `/home-2/` — high-volume hiring demo with qualifying filters and A/B variants
 
 Only pages carrying the Jobs theme ownership marker are refreshed. An existing same-slug page created independently is left untouched.
 
@@ -93,6 +125,7 @@ The integrated engine also exposes shortcodes for practical page composition:
 - `[wpbb_salary_guide]`
 - `[wpbb_salary_calculator]`
 - `[wpbb_jobs_career_advice]`
+- `[wpbb_jobs_high_volume_home]`
 
 ## Admin structure
 
@@ -164,3 +197,8 @@ The Jobs child theme uses the same suite-wide frontend preview protection as the
 
 
 **3.8.10.80 admin fix:** the General-tab checkbox and password input are injected after ACF renders the settings panel, avoiding ACF Message-field sanitisation. The dedicated **Save protection settings** button can now actually disable the gate or change its password. The parent theme is not modified.
+
+
+## Visual direction
+
+Version 3.8.10.85 refines the multilingual Jobs demo toward a calmer business-recruitment presentation: search-first hero, softer typography, subtle borders, lighter shadows, clearer information hierarchy and consistent geometry across all supported languages.

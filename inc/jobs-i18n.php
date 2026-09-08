@@ -26,7 +26,8 @@ function wpbb_jobs_translation_dictionary( $lang = '' ) {
         if ( ! is_array( $all ) ) $all = array();
     }
     $lang = sanitize_key( $lang ?: wpbb_jobs_current_language() );
-    return isset( $all[ $lang ] ) && is_array( $all[ $lang ] ) ? $all[ $lang ] : array();
+    $dictionary = isset( $all[ $lang ] ) && is_array( $all[ $lang ] ) ? $all[ $lang ] : array();
+    return apply_filters( 'wpbb_jobs_translation_dictionary', $dictionary, $lang );
 }
 
 function wpbb_jobs_translate_text( $text, $lang = '' ) {
@@ -136,14 +137,14 @@ function wpbb_jobs_v80_sync_managed_translations() {
     if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) return;
     if ( ! function_exists( 'pll_get_post' ) || ! function_exists( 'wp_theme_demo_polylang_languages' ) ) return;
     $done_key = 'wpbb_jobs_v80_translation_parity_' . sanitize_key( get_stylesheet() );
-    if ( '3.8.10.80' === (string) get_option( $done_key ) ) return;
+    if ( '3.8.10.86' === (string) get_option( $done_key ) ) return;
 
     $profile = function_exists( 'wpbb_child_v71_demo_profile' ) ? wpbb_child_v71_demo_profile() : array( 'id' => 'jobs' );
     if ( ( $profile['id'] ?? '' ) !== 'jobs' ) return;
     $front = absint( get_option( 'page_on_front' ) );
     $sources = array();
     if ( $front ) $sources['home'] = $front;
-    foreach ( array( 'jobs','hiring-companies','find-candidates','candidate-dashboard','employer-dashboard','post-a-job','create-resume','login-register','salary-guide' ) as $slug ) {
+    foreach ( array( 'jobs','hiring-companies','find-candidates','candidate-dashboard','employer-dashboard','post-a-job','create-resume','login-register','salary-guide','home-2' ) as $slug ) {
         $page = get_page_by_path( $slug, OBJECT, 'page' );
         if ( $page instanceof WP_Post ) $sources[ $slug ] = (int) $page->ID;
     }
@@ -179,14 +180,14 @@ function wpbb_jobs_v80_sync_managed_translations() {
             wp_update_post( array( 'ID' => $target_id, 'post_content' => $content, 'post_title' => $localized_title ?: get_the_title( $target_id ) ) );
             update_post_meta( $target_id, '_wp_theme_demo_translation_source', $source_id );
             update_post_meta( $target_id, '_wp_theme_demo_managed', '1' );
-            update_post_meta( $target_id, '_wpbb_child_bbuilder_version', '3.8.10.80' );
+            update_post_meta( $target_id, '_wpbb_child_bbuilder_version', '3.8.10.86' );
             clean_post_cache( $target_id );
         }
         wpbb_jobs_restore_language_override( $previous );
     }
     if ( function_exists( 'wpbb_jobs_localize_managed_translation_links' ) ) wpbb_jobs_localize_managed_translation_links( array_values( $sources ) );
     if ( function_exists( 'wp_theme_create_demo_polylang_menus' ) ) wp_theme_create_demo_polylang_menus( $profile );
-    update_option( $done_key, '3.8.10.80', false );
+    update_option( $done_key, '3.8.10.86', false );
 }
 add_action( 'admin_init', 'wpbb_jobs_v80_sync_managed_translations', 95 );
 
@@ -200,7 +201,7 @@ function wpbb_jobs_localize_managed_translation_links( $source_ids ) {
     if ( ! $source_ids ) return;
 
     $link_sources = array();
-    foreach ( array( 'jobs','hiring-companies','salary-guide','create-resume','post-a-job','candidate-dashboard','employer-dashboard','find-candidates','login-register','about','contact' ) as $slug ) {
+    foreach ( array( 'jobs','hiring-companies','salary-guide','create-resume','post-a-job','candidate-dashboard','employer-dashboard','find-candidates','login-register','home-2','about','contact' ) as $slug ) {
         $page = get_page_by_path( $slug, OBJECT, 'page' );
         if ( $page instanceof WP_Post ) $link_sources[] = (int) $page->ID;
     }

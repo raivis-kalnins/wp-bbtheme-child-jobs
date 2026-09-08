@@ -147,7 +147,7 @@ function wpbb_jobs_render_job_card( $job ) {
 function wpbb_jobs_jobs_list( $atts = array() ) {
     $atts = wp_parse_args( $atts, array( 'per_page' => 12, 'columns' => 2, 'featured' => false, 'pagination' => true ) );
     $query = new WP_Query( wpbb_jobs_query_args( $atts ) );
-    $columns = max( 1, min( 3, absint( $atts['columns'] ) ) );
+    $columns = max( 1, min( 4, absint( $atts['columns'] ) ) );
     ob_start();
     echo wpbb_jobs_front_notice_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     if ( ! $query->have_posts() ) {
@@ -239,7 +239,7 @@ function wpbb_jobs_resumes_list( $atts = array() ) {
             $skills = wp_get_post_terms( $resume->ID, 'wpbb_job_skill', array( 'fields' => 'names' ) );
             $file_id = absint( get_post_meta( $resume->ID, '_wpbb_resume_file_id', true ) );
             echo '<article class="wpbb-jobs-resume-card">';
-            echo '<div class="wpbb-jobs-resume-card__avatar">' . esc_html( strtoupper( substr( $resume->post_title, 0, 1 ) ) ) . '</div>';
+            echo '<div class="wpbb-jobs-resume-card__avatar">' . ( function_exists( 'wpbb_jobs_resume_avatar_html' ) ? wpbb_jobs_resume_avatar_html( $resume ) : esc_html( strtoupper( substr( $resume->post_title, 0, 1 ) ) ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo '<h3>' . esc_html( $resume->post_title ) . '</h3>';
             if ( $headline ) echo '<p class="wpbb-jobs-resume-card__headline">' . esc_html( $headline ) . '</p>';
             if ( $location ) echo '<p class="wpbb-jobs-resume-card__meta">' . esc_html( $location ) . '</p>';
@@ -265,19 +265,34 @@ function wpbb_jobs_registration_form() {
     <div class="wpbb-jobs-auth-grid">
         <section class="wpbb-jobs-panel">
             <h2><?php esc_html_e( 'Create an account', 'wp-bbtheme-child' ); ?></h2>
-            <form class="wpbb-jobs-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+            <form class="wpbb-jobs-form" data-wpbb-jobs-public-form="1" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                 <input type="hidden" name="action" value="wpbb_jobs_register" />
                 <?php wp_nonce_field( 'wpbb_jobs_register', 'wpbb_jobs_nonce' ); ?>
                 <label><?php esc_html_e( 'I am', 'wp-bbtheme-child' ); ?><select name="account_type"><option value="candidate"><?php esc_html_e( 'looking for work', 'wp-bbtheme-child' ); ?></option><option value="employer"><?php esc_html_e( 'hiring', 'wp-bbtheme-child' ); ?></option></select></label>
                 <label><?php esc_html_e( 'Name', 'wp-bbtheme-child' ); ?><input name="name" required /></label>
                 <label><?php esc_html_e( 'Email', 'wp-bbtheme-child' ); ?><input type="email" name="email" required /></label>
                 <label><?php esc_html_e( 'Password', 'wp-bbtheme-child' ); ?><input type="password" name="password" minlength="8" required autocomplete="new-password" /></label>
+                <?php if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'registration' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Create account', 'wp-bbtheme-child' ); ?></button>
             </form>
         </section>
         <section class="wpbb-jobs-panel">
             <h2><?php esc_html_e( 'Sign in', 'wp-bbtheme-child' ); ?></h2>
-            <?php wp_login_form( array( 'redirect' => wpbb_jobs_page_url( 'candidate-dashboard' ), 'remember' => true ) ); ?>
+            <?php if ( function_exists( 'wpbb_jobs_linkedin_button_html' ) ) echo wpbb_jobs_linkedin_button_html( wpbb_jobs_page_url( 'candidate-dashboard' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php
+            $login_html = wp_login_form( array(
+                'echo'     => false,
+                'redirect' => wpbb_jobs_page_url( 'candidate-dashboard' ),
+                'remember' => true,
+                'form_id'  => 'wpbb-jobs-login-form',
+            ) );
+            if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) {
+                $login_extra = '<input type="hidden" name="wpbb_jobs_public_login" value="1">' . wpbb_jobs_v86_public_hcaptcha_html( 'login' );
+                $login_html = preg_replace( '/<form\b/', '<form data-wpbb-jobs-public-form="1"', $login_html, 1 );
+                $login_html = preg_replace( '/<\/form>\s*$/', $login_extra . '</form>', $login_html, 1 );
+            }
+            echo $login_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            ?>
         </section>
     </div>
     <?php
@@ -346,27 +361,47 @@ function wpbb_jobs_job_form( $job_id = 0 ) {
 }
 
 function wpbb_jobs_resume_form() {
-    if ( ! is_user_logged_in() || ! wpbb_jobs_is_candidate() ) return '<div class="wpbb-jobs-gate"><p>' . esc_html__( 'Sign in with a candidate account to create your profile.', 'wp-bbtheme-child' ) . '</p><a class="wpbb-jobs-button" href="' . esc_url( wpbb_jobs_page_url( 'login-register' ) ) . '">' . esc_html__( 'Candidate login', 'wp-bbtheme-child' ) . '</a></div>';
+    if ( ! is_user_logged_in() || ! wpbb_jobs_is_candidate() ) return '<div class="wpbb-jobs-gate"><p>' . esc_html__( 'Sign in with a candidate account to create or update your profile.', 'wp-bbtheme-child' ) . '</p><a class="wpbb-jobs-button" href="' . esc_url( wpbb_jobs_page_url( 'login-register' ) ) . '">' . esc_html__( 'Candidate login', 'wp-bbtheme-child' ) . '</a></div>';
     $resume = wpbb_jobs_get_user_resume();
     $category_id = $resume ? wpbb_jobs_term_id( $resume->ID, 'wpbb_job_category' ) : 0;
     $location_id = $resume ? wpbb_jobs_term_id( $resume->ID, 'wpbb_job_location' ) : 0;
     $skills = $resume ? wp_get_post_terms( $resume->ID, 'wpbb_job_skill', array( 'fields' => 'names' ) ) : array();
+    $user = wp_get_current_user();
+    $linkedin_picture = $resume ? get_post_meta( $resume->ID, '_wpbb_resume_linkedin_picture_url', true ) : get_user_meta( $user->ID, '_wpbb_linkedin_picture_url', true );
     ob_start(); echo wpbb_jobs_front_notice_html(); ?>
-    <form class="wpbb-jobs-form wpbb-jobs-panel" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+    <form class="wpbb-jobs-form wpbb-jobs-panel wpbb-jobs-cv-builder" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
         <input type="hidden" name="action" value="wpbb_jobs_resume_save" /><?php wp_nonce_field( 'wpbb_jobs_resume_save', 'wpbb_jobs_nonce' ); ?>
-        <h2><?php esc_html_e( 'Candidate profile', 'wp-bbtheme-child' ); ?></h2>
-        <div class="wpbb-jobs-form__grid">
-            <label><?php esc_html_e( 'Name', 'wp-bbtheme-child' ); ?><input name="candidate_name" required value="<?php echo esc_attr( $resume ? $resume->post_title : wp_get_current_user()->display_name ); ?>" /></label>
-            <label><?php esc_html_e( 'Professional headline', 'wp-bbtheme-child' ); ?><input name="headline" required value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_headline', true ) : '' ); ?>" /></label>
-            <label><?php esc_html_e( 'Phone', 'wp-bbtheme-child' ); ?><input name="phone" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_phone', true ) : '' ); ?>" /></label>
-            <label><?php esc_html_e( 'Availability', 'wp-bbtheme-child' ); ?><input name="availability" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_availability', true ) : '' ); ?>" placeholder="<?php esc_attr_e( 'e.g. 1 month notice', 'wp-bbtheme-child' ); ?>" /></label>
-            <label><?php esc_html_e( 'Primary discipline', 'wp-bbtheme-child' ); ?><select name="resume_category"><option value=""><?php esc_html_e( 'Choose category', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_category' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
-            <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="resume_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_location' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
+        <div class="wpbb-jobs-cv-builder__head">
+            <div class="wpbb-jobs-cv-builder__avatar"><?php if ( $resume && function_exists( 'wpbb_jobs_resume_avatar_html' ) ) echo wpbb_jobs_resume_avatar_html( $resume, 'medium' ); elseif ( $linkedin_picture ) echo '<img class="wpbb-jobs-resume-photo" src="' . esc_url( $linkedin_picture ) . '" alt="" />'; else echo '<span class="wpbb-jobs-resume-initial">' . esc_html( strtoupper( substr( $user->display_name ?: 'C', 0, 1 ) ) ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+            <div><p class="wp-theme-sector-eyebrow"><?php esc_html_e( 'Candidate profile', 'wp-bbtheme-child' ); ?></p><h2><?php esc_html_e( 'Build a reusable CV profile', 'wp-bbtheme-child' ); ?></h2><p><?php esc_html_e( 'Keep the structured profile editable, add a profile photo and attach your original CV for employers and applications.', 'wp-bbtheme-child' ); ?></p></div>
         </div>
-        <label><?php esc_html_e( 'Skills (comma separated)', 'wp-bbtheme-child' ); ?><input name="skills" value="<?php echo esc_attr( ( $skills && ! is_wp_error( $skills ) ) ? implode( ', ', $skills ) : '' ); ?>" /></label>
-        <label><?php esc_html_e( 'Profile summary / experience', 'wp-bbtheme-child' ); ?><textarea name="resume_summary" rows="10"><?php echo esc_textarea( $resume ? $resume->post_content : '' ); ?></textarea></label>
-        <label><?php esc_html_e( 'CV file (PDF, DOC or DOCX)', 'wp-bbtheme-child' ); ?><input type="file" name="resume_file" accept=".pdf,.doc,.docx" /></label>
-        <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Save candidate profile', 'wp-bbtheme-child' ); ?></button>
+        <fieldset><legend><?php esc_html_e( 'Profile basics', 'wp-bbtheme-child' ); ?></legend>
+            <div class="wpbb-jobs-form__grid">
+                <label><?php esc_html_e( 'Name', 'wp-bbtheme-child' ); ?><input name="candidate_name" required value="<?php echo esc_attr( $resume ? $resume->post_title : $user->display_name ); ?>" /></label>
+                <label><?php esc_html_e( 'Professional headline', 'wp-bbtheme-child' ); ?><input name="headline" required value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_headline', true ) : '' ); ?>" placeholder="<?php esc_attr_e( 'e.g. Senior project manager', 'wp-bbtheme-child' ); ?>" /></label>
+                <label><?php esc_html_e( 'Phone', 'wp-bbtheme-child' ); ?><input name="phone" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_phone', true ) : '' ); ?>" /></label>
+                <label><?php esc_html_e( 'Availability', 'wp-bbtheme-child' ); ?><input name="availability" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_availability', true ) : '' ); ?>" placeholder="<?php esc_attr_e( 'e.g. 1 month notice', 'wp-bbtheme-child' ); ?>" /></label>
+                <label><?php esc_html_e( 'Current role / employer', 'wp-bbtheme-child' ); ?><input name="current_role" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_current_role', true ) : '' ); ?>" /></label>
+                <label><?php esc_html_e( 'Primary discipline', 'wp-bbtheme-child' ); ?><select name="resume_category"><option value=""><?php esc_html_e( 'Choose category', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_category' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
+                <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="resume_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_location' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
+                <label><?php esc_html_e( 'Profile photo', 'wp-bbtheme-child' ); ?><input type="file" name="profile_image" accept="image/jpeg,image/png,image/webp" /><small><?php esc_html_e( 'JPG, PNG or WebP, up to 5 MB.', 'wp-bbtheme-child' ); ?></small></label>
+            </div>
+        </fieldset>
+        <fieldset><legend><?php esc_html_e( 'Skills and links', 'wp-bbtheme-child' ); ?></legend>
+            <label><?php esc_html_e( 'Skills (comma separated)', 'wp-bbtheme-child' ); ?><input name="skills" value="<?php echo esc_attr( ( $skills && ! is_wp_error( $skills ) ) ? implode( ', ', $skills ) : '' ); ?>" /></label>
+            <div class="wpbb-jobs-form__grid">
+                <label><?php esc_html_e( 'Portfolio or website', 'wp-bbtheme-child' ); ?><input type="url" name="website" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_website', true ) : '' ); ?>" /></label>
+                <label><?php esc_html_e( 'LinkedIn profile URL', 'wp-bbtheme-child' ); ?><input type="url" name="linkedin_url" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_linkedin_url', true ) : '' ); ?>" /></label>
+            </div>
+            <label><?php esc_html_e( 'Languages', 'wp-bbtheme-child' ); ?><input name="languages" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_languages', true ) : '' ); ?>" placeholder="<?php esc_attr_e( 'e.g. English, German', 'wp-bbtheme-child' ); ?>" /></label>
+        </fieldset>
+        <fieldset><legend><?php esc_html_e( 'CV content', 'wp-bbtheme-child' ); ?></legend>
+            <label><?php esc_html_e( 'Profile summary / experience', 'wp-bbtheme-child' ); ?><textarea name="resume_summary" rows="7"><?php echo esc_textarea( $resume ? $resume->post_content : '' ); ?></textarea></label>
+            <label><?php esc_html_e( 'Work experience', 'wp-bbtheme-child' ); ?><textarea name="work_experience" rows="7" placeholder="<?php esc_attr_e( 'Role, employer, dates and key achievements', 'wp-bbtheme-child' ); ?>"><?php echo esc_textarea( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_work_experience', true ) : '' ); ?></textarea></label>
+            <label><?php esc_html_e( 'Education', 'wp-bbtheme-child' ); ?><textarea name="education" rows="5"><?php echo esc_textarea( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_education', true ) : '' ); ?></textarea></label>
+            <label><?php esc_html_e( 'CV file (PDF, DOC or DOCX)', 'wp-bbtheme-child' ); ?><input type="file" name="resume_file" accept=".pdf,.doc,.docx" /><small><?php esc_html_e( 'The original CV stays securely attached to your profile. Structured fields above remain editable and reusable.', 'wp-bbtheme-child' ); ?></small></label>
+        </fieldset>
+        <div class="wpbb-jobs-cv-builder__actions"><button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Save candidate profile', 'wp-bbtheme-child' ); ?></button><?php if ( function_exists( 'wpbb_jobs_linkedin_button_html' ) && ! get_user_meta( $user->ID, '_wpbb_linkedin_sub', true ) ) echo wpbb_jobs_linkedin_button_html( wpbb_jobs_page_url( 'create-resume' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
     </form><?php
     return ob_get_clean();
 }
@@ -378,7 +413,7 @@ function wpbb_jobs_apply_form( $job_id ) {
     if ( ! $logged_in && ! wpbb_jobs_setting( 'guest_apply', 1 ) ) return '<div class="wpbb-jobs-gate"><p>' . esc_html__( 'Create a candidate account to apply.', 'wp-bbtheme-child' ) . '</p><a class="wpbb-jobs-button" href="' . esc_url( wpbb_jobs_page_url( 'login-register' ) ) . '">' . esc_html__( 'Create account / sign in', 'wp-bbtheme-child' ) . '</a></div>';
     $resume = $logged_in ? wpbb_jobs_get_user_resume() : null;
     ob_start(); echo wpbb_jobs_front_notice_html(); ?>
-    <form class="wpbb-jobs-form wpbb-jobs-apply wpbb-jobs-panel" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+    <form class="wpbb-jobs-form wpbb-jobs-apply wpbb-jobs-panel"<?php echo ! $logged_in ? ' data-wpbb-jobs-public-form="1"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
         <input type="hidden" name="action" value="wpbb_jobs_apply" /><input type="hidden" name="job_id" value="<?php echo esc_attr( $job_id ); ?>" />
         <?php wp_nonce_field( 'wpbb_jobs_apply_' . $job_id, 'wpbb_jobs_nonce' ); ?>
         <h2><?php esc_html_e( 'Apply for this job', 'wp-bbtheme-child' ); ?></h2>
@@ -387,6 +422,7 @@ function wpbb_jobs_apply_form( $job_id ) {
         <label><?php esc_html_e( 'Phone', 'wp-bbtheme-child' ); ?><input name="applicant_phone" /></label>
         <label><?php esc_html_e( 'Message to the hiring team', 'wp-bbtheme-child' ); ?><textarea name="application_message" rows="6"></textarea></label>
         <label><?php echo esc_html( $resume ? __( 'Replace attached CV for this application (optional)', 'wp-bbtheme-child' ) : __( 'CV file (PDF, DOC or DOCX)', 'wp-bbtheme-child' ) ); ?><input type="file" name="cv_file" accept=".pdf,.doc,.docx" /></label>
+        <?php if ( ! $logged_in && function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'guest-application' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Send application', 'wp-bbtheme-child' ); ?></button>
     </form><?php
     return ob_get_clean();
@@ -425,6 +461,7 @@ function wpbb_jobs_employer_dashboard() {
         <div class="wpbb-jobs-dashboard__stats"><div><strong><?php echo esc_html( count( $jobs ) ); ?></strong><span><?php esc_html_e( 'Jobs', 'wp-bbtheme-child' ); ?></span></div><div><strong><?php echo esc_html( count( $applications ) ); ?></strong><span><?php esc_html_e( 'Applications', 'wp-bbtheme-child' ); ?></span></div><div><strong><?php echo esc_html( count( $company_ids ) ); ?></strong><span><?php esc_html_e( 'Companies', 'wp-bbtheme-child' ); ?></span></div></div>
         <div class="wpbb-jobs-dashboard__actions"><a class="wpbb-jobs-button" href="<?php echo esc_url( wpbb_jobs_page_url( 'post-a-job' ) ); ?>"><?php esc_html_e( 'Post a job', 'wp-bbtheme-child' ); ?></a><a class="wpbb-jobs-button is-secondary" href="<?php echo esc_url( wpbb_jobs_page_url( 'find-candidates' ) ); ?>"><?php esc_html_e( 'Find candidates', 'wp-bbtheme-child' ); ?></a></div>
         <div class="wpbb-jobs-dashboard__columns"><section class="wpbb-jobs-panel"><h2><?php esc_html_e( 'Company profile', 'wp-bbtheme-child' ); ?></h2><?php echo wpbb_jobs_company_form( $company_ids ? (int) $company_ids[0] : 0 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></section><section class="wpbb-jobs-panel"><h2><?php esc_html_e( 'Your jobs', 'wp-bbtheme-child' ); ?></h2><?php if ( ! $jobs ) : ?><p><?php esc_html_e( 'No jobs posted yet.', 'wp-bbtheme-child' ); ?></p><?php else : ?><ul class="wpbb-jobs-dashboard-list"><?php foreach ( array_slice( $jobs, 0, 10 ) as $job ) : ?><li><div><a href="<?php echo esc_url( 'publish' === $job->post_status ? get_permalink( $job ) : wpbb_jobs_page_url( 'post-a-job' ) . '?edit_job=' . $job->ID ); ?>"><?php echo esc_html( $job->post_title ); ?></a><small><?php echo esc_html( ucfirst( $job->post_status ) ); ?></small></div><a href="<?php echo esc_url( add_query_arg( 'edit_job', $job->ID, wpbb_jobs_page_url( 'post-a-job' ) ) ); ?>"><?php esc_html_e( 'Edit', 'wp-bbtheme-child' ); ?></a></li><?php endforeach; ?></ul><?php endif; ?></section></div>
+        <?php if ( function_exists( 'wpbb_jobs_application_pipeline_html' ) ) echo wpbb_jobs_application_pipeline_html( $applications, $jobs ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <section class="wpbb-jobs-panel"><h2><?php esc_html_e( 'Recent applications', 'wp-bbtheme-child' ); ?></h2><?php if ( ! $applications ) : ?><p><?php esc_html_e( 'Applications will appear here when candidates apply.', 'wp-bbtheme-child' ); ?></p><?php else : ?><div class="wpbb-jobs-table-wrap"><table class="wpbb-jobs-table"><thead><tr><th><?php esc_html_e( 'Candidate', 'wp-bbtheme-child' ); ?></th><th><?php esc_html_e( 'Job', 'wp-bbtheme-child' ); ?></th><th><?php esc_html_e( 'Status', 'wp-bbtheme-child' ); ?></th><th><?php esc_html_e( 'Update', 'wp-bbtheme-child' ); ?></th></tr></thead><tbody><?php foreach ( array_slice( $applications, 0, 20 ) as $app ) : $job_id = absint( get_post_meta( $app->ID, '_wpbb_application_job_id', true ) ); $status = get_post_meta( $app->ID, '_wpbb_application_status', true ) ?: 'new'; ?><tr><td><?php echo esc_html( get_post_meta( $app->ID, '_wpbb_application_name', true ) ); ?><small><?php echo esc_html( get_post_meta( $app->ID, '_wpbb_application_email', true ) ); ?></small><?php $cv_id = absint( get_post_meta( $app->ID, '_wpbb_application_cv_id', true ) ); if ( $cv_id ) : ?><small><a href="<?php echo esc_url( wpbb_jobs_cv_download_url( $cv_id ) ); ?>"><?php esc_html_e( 'Download CV', 'wp-bbtheme-child' ); ?></a></small><?php endif; ?></td><td><?php echo esc_html( get_the_title( $job_id ) ); ?></td><td><span class="wpbb-jobs-status is-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( $statuses[ $status ] ?? ucfirst( $status ) ); ?></span></td><td><form class="wpbb-jobs-status-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="wpbb_jobs_application_status" /><input type="hidden" name="application_id" value="<?php echo esc_attr( $app->ID ); ?>" /><?php wp_nonce_field( 'wpbb_jobs_application_status_' . $app->ID, 'wpbb_jobs_nonce' ); ?><select name="application_status"><?php foreach ( $statuses as $key => $label ) : ?><option value="<?php echo esc_attr( $key ); ?>" <?php selected( $status, $key ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select><button type="submit" class="wpbb-jobs-link-button"><?php esc_html_e( 'Save', 'wp-bbtheme-child' ); ?></button></form></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?></section>
     </div><?php
     return ob_get_clean();

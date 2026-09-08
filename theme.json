@@ -3,18 +3,55 @@
   "version": 3,
   "settings": {
     "appearanceTools": true,
-    "layout": { "contentSize": "880px", "wideSize": "1280px" },
+    "layout": {
+      "contentSize": "880px",
+      "wideSize": "1280px"
+    },
     "color": {
       "palette": [
-        { "slug": "jobs-ink", "name": "Jobs Ink", "color": "#0b1739" },
-        { "slug": "jobs-brand", "name": "Jobs Brand", "color": "#3155d9" },
-        { "slug": "jobs-accent", "name": "Jobs Accent", "color": "#19a7ce" },
-        { "slug": "jobs-surface", "name": "Jobs Surface", "color": "#f6f8fc" },
-        { "slug": "white", "name": "White", "color": "#ffffff" }
+        {
+          "slug": "jobs-ink",
+          "name": "Jobs Ink",
+          "color": "#10254c"
+        },
+        {
+          "slug": "jobs-brand",
+          "name": "Jobs Brand",
+          "color": "#078f6a"
+        },
+        {
+          "slug": "jobs-accent",
+          "name": "Jobs Accent",
+          "color": "#0caf80"
+        },
+        {
+          "slug": "jobs-mint",
+          "name": "Jobs Mint",
+          "color": "#eef8f5"
+        },
+        {
+          "slug": "jobs-surface",
+          "name": "Jobs Surface",
+          "color": "#f7fbfa"
+        },
+        {
+          "slug": "white",
+          "name": "White",
+          "color": "#ffffff"
+        }
       ]
     },
-    "spacing": { "units": ["px", "rem", "%", "vw"] },
-    "typography": { "fluid": false }
+    "spacing": {
+      "units": [
+        "px",
+        "rem",
+        "%",
+        "vw"
+      ]
+    },
+    "typography": {
+      "fluid": false
+    }
   },
   "styles": {
     "typography": {
@@ -22,8 +59,17 @@
       "lineHeight": "1.6"
     },
     "elements": {
-      "heading": { "typography": { "fontWeight": "750", "lineHeight": "1.1" } },
-      "link": { "color": { "text": "#3155d9" } }
+      "heading": {
+        "typography": {
+          "fontWeight": "750",
+          "lineHeight": "1.1"
+        }
+      },
+      "link": {
+        "color": {
+          "text": "#08765c"
+        }
+      }
     }
   }
 }

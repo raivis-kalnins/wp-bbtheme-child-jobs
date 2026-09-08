@@ -72,12 +72,12 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
     }
     $blog_url = $blog_id ? get_permalink( $blog_id ) : home_url( '/blog/' );
 
-    $hero_left  = wpbb_child_v62_paragraph( __( 'Find work. Build teams. Make the next move clearer.', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
-    $hero_left .= wpbb_child_v62_heading( __( 'Find a job that fits your life — and your next move.', 'wp-bbtheme-child' ), 1, 'wpbb-jobs-home-title' );
-    $hero_left .= wpbb_child_v62_paragraph( __( 'Search live roles by title, location and working pattern. Compare salaries, explore employers and keep your applications in one place.', 'wp-bbtheme-child' ), 'wpbb-jobs-home-intro' );
+    $hero_left  = wpbb_child_v62_paragraph( __( 'Your next opportunity starts here', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
+    $hero_left .= wpbb_child_v62_heading( __( 'Find a job that fits your life.', 'wp-bbtheme-child' ), 1, 'wpbb-jobs-home-title' );
+    $hero_left .= wpbb_child_v62_paragraph( __( 'Search thousands of jobs, discover top employers and take the next step in your career.', 'wp-bbtheme-child' ), 'wpbb-jobs-home-intro' );
     $hero_left .= wpbb_jobs_block( 'search', array( 'compact' => true ) );
-    $popular = array( 'Remote' => 'remote', 'Data' => 'data', 'Marketing' => 'marketing', 'Design' => 'design', 'Finance' => 'finance' );
-    $chips = '<div class="wpbb-jobs-popular"><span>' . esc_html__( 'Popular:', 'wp-bbtheme-child' ) . '</span>';
+    $popular = array( 'Remote' => 'remote', 'Part time' => 'part-time', 'Full time' => 'full-time', 'Marketing' => 'marketing', 'IT' => 'it', 'Finance' => 'finance' );
+    $chips = '<div class="wpbb-jobs-popular"><span>' . esc_html__( 'Popular searches:', 'wp-bbtheme-child' ) . '</span>';
     foreach ( $popular as $label => $keyword ) {
         $chip_label = function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $label ) : $label;
         $chips .= '<a href="' . esc_url( add_query_arg( 'job_keyword', $keyword, $jobs_url ) ) . '">' . esc_html( $chip_label ) . '</a>';
@@ -85,8 +85,8 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
     $chips .= '</div>';
     $hero_left .= wpbb_child_v62_block( 'html', array(), $chips );
 
-    $hero_right  = wpbb_child_v62_image( wpbb_jobs_asset_url( 'candidate-interview.jpg' ), 'wpbb-jobs-home-hero-image' );
-    $hero_right .= wpbb_child_v62_block( 'html', array(), '<div class="wpbb-jobs-home-trust"><strong>' . esc_html__( 'A practical recruitment marketplace', 'wp-bbtheme-child' ) . '</strong><span>' . esc_html__( 'Jobs, employers, applications and salary tools in one editable WordPress experience.', 'wp-bbtheme-child' ) . '</span></div>' );
+    $hero_right  = wpbb_child_v62_image( wpbb_jobs_asset_url( 'jobs-hero-reference.jpg' ), 'wpbb-jobs-home-hero-image' );
+    $hero_right .= wpbb_child_v62_block( 'html', array(), '<div class="wpbb-jobs-home-hero-note">' . esc_html__( 'A brighter career starts here', 'wp-bbtheme-child' ) . '<span aria-hidden="true">↙</span></div>' );
 
     $hero_row = wpbb_child_v62_block( 'wpbb/row', array( 'customClasses' => 'wpbb-jobs-home-hero-row align-items-center', 'gutterX' => 'gx-5', 'gutterY' => 'gy-4' ),
         wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 7 ), $hero_left ) .
@@ -97,7 +97,7 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
     $categories  = wpbb_child_v62_paragraph( __( 'Explore opportunities', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
     $categories .= wpbb_child_v62_heading( __( 'Browse jobs by career area.', 'wp-bbtheme-child' ), 2 );
     $categories .= wpbb_child_v62_paragraph( __( 'Start broad, then narrow the live vacancies by location, contract type and the details that matter to you.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
-    $categories .= wpbb_jobs_block( 'categories', array( 'limit' => 8 ) );
+    $categories .= wpbb_jobs_block( 'categories', array( 'limit' => 6 ) );
     $categories .= wpbb_child_v62_paragraph( '<a class="wpbb-jobs-text-link" href="' . esc_url( $jobs_url ) . '">' . esc_html__( 'Browse all jobs', 'wp-bbtheme-child' ) . ' →</a>' );
     $categories = wpbb_child_v67_section( 'wpbb-jobs-home-categories', $categories );
 
@@ -108,21 +108,20 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
     $companies .= wpbb_child_v62_paragraph( '<a class="wpbb-jobs-text-link" href="' . esc_url( $companies_url ) . '">' . esc_html__( 'View all hiring companies', 'wp-bbtheme-child' ) . ' →</a>' );
     $companies = wpbb_child_v67_section( 'wpbb-jobs-home-companies bg-light', $companies );
 
-    $salary_copy  = wpbb_child_v62_paragraph( __( 'Salary planner', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
-    $salary_copy .= wpbb_child_v62_heading( __( 'Know the salary. Understand the take-home pay.', 'wp-bbtheme-child' ), 2 );
-    $salary_copy .= wpbb_child_v62_paragraph( __( 'Compare salary signals from the vacancies on this site, then estimate what a gross salary could mean after Income Tax, employee National Insurance and an optional salary-sacrifice pension.', 'wp-bbtheme-child' ) );
-    $salary_copy .= wpbb_jobs_block( 'salary-guide', array( 'limit' => 4 ) );
-    $salary_copy .= wpbb_child_v62_paragraph( '<a class="wpbb-jobs-text-link" href="' . esc_url( $salary_url ) . '">' . esc_html__( 'Open the full salary guide', 'wp-bbtheme-child' ) . ' →</a>' );
-    $salary_row = wpbb_child_v62_block( 'wpbb/row', array( 'customClasses' => 'wpbb-jobs-home-salary-row align-items-start', 'gutterX' => 'gx-5', 'gutterY' => 'gy-4' ),
+    $salary_copy  = wpbb_child_v62_paragraph( __( 'Know your worth', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
+    $salary_copy .= wpbb_child_v62_heading( __( 'Salary calculator', 'wp-bbtheme-child' ), 2 );
+    $salary_copy .= wpbb_child_v62_paragraph( __( 'Find out what you could be earning. Get an estimate based on your role, location and experience.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
+    $salary_copy .= wpbb_child_v62_block( 'wpbb/button', array( 'text' => __( 'Calculate your salary', 'wp-bbtheme-child' ), 'url' => $salary_url, 'btnClass' => 'btn btn-primary' ), '', true );
+    $salary_row = wpbb_child_v62_block( 'wpbb/row', array( 'customClasses' => 'wpbb-jobs-home-salary-row align-items-center', 'gutterX' => 'gx-5', 'gutterY' => 'gy-4' ),
         wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 5 ), $salary_copy ) .
         wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 7 ), wpbb_jobs_block( 'salary-calculator' ) )
     );
     $salary = wpbb_child_v67_section( 'wpbb-jobs-home-salary', $salary_row );
 
-    $latest  = wpbb_child_v62_paragraph( __( 'Latest opportunities', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
-    $latest .= wpbb_child_v62_heading( __( 'Fresh jobs worth a closer look.', 'wp-bbtheme-child' ), 2 );
-    $latest .= wpbb_child_v62_paragraph( __( 'A small, useful selection on the homepage — the full vacancy list stays on the Jobs page where filters and pagination belong.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
-    $latest .= wpbb_jobs_block( 'list', array( 'perPage' => 6, 'columns' => 2, 'featured' => false ) );
+    $latest  = wpbb_child_v62_paragraph( __( 'Featured opportunities', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
+    $latest .= wpbb_child_v62_heading( __( 'Featured jobs', 'wp-bbtheme-child' ), 2 );
+    $latest .= wpbb_child_v62_paragraph( __( 'A useful selection of current roles from employers hiring now.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
+    $latest .= wpbb_jobs_block( 'list', array( 'perPage' => 4, 'columns' => 4, 'featured' => false ) );
     $latest .= wpbb_child_v62_paragraph( '<a class="wpbb-jobs-text-link" href="' . esc_url( $jobs_url ) . '">' . esc_html__( 'See every open vacancy', 'wp-bbtheme-child' ) . ' →</a>' );
     $latest = wpbb_child_v67_section( 'wpbb-jobs-home-latest bg-light', $latest );
 
@@ -147,7 +146,7 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
     $routes = wpbb_child_v67_section( 'wpbb-jobs-home-routes', $routes_head . $routes_row );
 
     $advice  = wpbb_child_v62_paragraph( __( 'Career advice', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
-    $advice .= wpbb_child_v62_heading( __( 'Practical guidance for a better job search.', 'wp-bbtheme-child' ), 2 );
+    $advice .= wpbb_child_v62_heading( __( 'Latest news & career advice', 'wp-bbtheme-child' ), 2 );
     $advice .= wpbb_jobs_block( 'career-advice', array( 'limit' => 3 ) );
     $advice .= wpbb_child_v62_paragraph( '<a class="wpbb-jobs-text-link" href="' . esc_url( $blog_url ) . '">' . esc_html__( 'View all career advice', 'wp-bbtheme-child' ) . ' →</a>' );
     $advice = wpbb_child_v67_section( 'wpbb-jobs-home-advice bg-light', $advice );
@@ -160,7 +159,7 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
         'className' => 'wp-theme-home-cta wp-theme-home-cta-bbuilder wpbb-jobs-home-cta',
     ), '', true );
 
-    return $hero . $categories . $companies . $salary . $latest . $routes . $advice . $cta;
+    return $hero . $categories . $salary . $latest . $routes . $advice;
 }
 
 /**
@@ -224,10 +223,18 @@ function wpbb_jobs_portal_page_content( $slug ) {
             __( 'Compare salary signals from the live vacancies on this site and estimate take-home pay for the 2026/27 tax year.', 'wp-bbtheme-child' ),
             wpbb_jobs_block( 'salary-guide', array( 'limit' => 8 ) ) . wpbb_jobs_block( 'salary-calculator' ),
         ),
+        'home-2' => array(
+            __( 'High-volume Hiring Demo', 'wp-bbtheme-child' ),
+            __( 'A focused landing page for repeated roles, fast qualification and a clearer applicant pipeline.', 'wp-bbtheme-child' ),
+            wpbb_jobs_shortcode_block( '[wpbb_jobs_high_volume_home]' ),
+        ),
     );
 
     if ( empty( $pages[ $slug ] ) ) return '';
     list( $title, $intro, $body ) = $pages[ $slug ];
+    if ( 'home-2' === $slug ) {
+        return wpbb_jobs_section( $body, 'wpbb-jobs-portal-page-body wpbb-jobs-high-volume-body' );
+    }
     $header  = wpbb_child_v62_paragraph( __( 'TalentBridge Jobs', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
     $header .= wpbb_child_v62_heading( $title, 1, 'wpbb-jobs-portal-page-title' );
     $header .= wpbb_child_v62_paragraph( $intro, 'wpbb-jobs-portal-page-intro' );
@@ -248,8 +255,10 @@ function wpbb_jobs_create_portal_pages( $profile = null ) {
         'create-resume'       => __( 'Candidate Profile', 'wp-bbtheme-child' ),
         'login-register'      => __( 'Login & Register', 'wp-bbtheme-child' ),
         'salary-guide'        => __( 'Salary Guide & Calculator', 'wp-bbtheme-child' ),
+        'home-2'             => __( 'High-volume Hiring Demo', 'wp-bbtheme-child' ),
     );
     $result = array( 'created' => 0, 'updated' => 0, 'skipped' => 0 );
+    $managed_ids = array();
 
     foreach ( $specs as $slug => $title ) {
         $existing = get_page_by_path( $slug, OBJECT, 'page' );
@@ -266,7 +275,13 @@ function wpbb_jobs_create_portal_pages( $profile = null ) {
         if ( is_wp_error( $id ) || ! $id ) { $result['skipped']++; continue; }
         update_post_meta( $id, '_wpbb_jobs_portal_page', 1 );
         update_post_meta( $id, '_wp_theme_demo_profile', 'jobs' );
+        update_post_meta( $id, '_wp_theme_demo_managed', '1' );
+        update_post_meta( $id, '_wpbb_child_bbuilder_version', '3.8.10.87' );
+        $managed_ids[] = (int) $id;
         $existing instanceof WP_Post ? $result['updated']++ : $result['created']++;
+    }
+    if ( $managed_ids && function_exists( 'wp_theme_demo_create_polylang_translations' ) && function_exists( 'wp_theme_demo_polylang_languages' ) ) {
+        wp_theme_demo_create_polylang_translations( $managed_ids, array_keys( (array) wp_theme_demo_polylang_languages() ) );
     }
     return $result;
 }

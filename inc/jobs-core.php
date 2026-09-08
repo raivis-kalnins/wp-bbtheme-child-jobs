@@ -10,15 +10,20 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const WPBB_JOBS_VERSION = '3.8.10.80';
+const WPBB_JOBS_VERSION = '3.8.10.86';
 
 function wpbb_jobs_settings() {
     $defaults = array(
         'job_approval'     => 1,
         'company_approval' => 0,
-        'guest_apply'      => 1,
-        'currency'         => 'GBP',
-        'admin_email'      => get_option( 'admin_email' ),
+        'guest_apply'            => 1,
+        'currency'               => 'GBP',
+        'admin_email'            => get_option( 'admin_email' ),
+        'linkedin_enabled'       => 0,
+        'linkedin_client_id'     => '',
+        'linkedin_client_secret' => '',
+        'crm_webhook_url'        => '',
+        'crm_webhook_secret'     => '',
     );
     $saved = get_option( 'wpbb_jobs_settings', array() );
     return wp_parse_args( is_array( $saved ) ? $saved : array(), $defaults );
@@ -415,6 +420,12 @@ function wpbb_jobs_front_notice_html() {
 function wpbb_jobs_handle_registration() {
     if ( is_user_logged_in() ) wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'login-register' ), 'info', __( 'You are already signed in.', 'wp-bbtheme-child' ) );
     check_admin_referer( 'wpbb_jobs_register', 'wpbb_jobs_nonce' );
+    if ( function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
+        $captcha = wpbb_jobs_v86_verify_public_hcaptcha();
+        if ( is_wp_error( $captcha ) ) {
+            wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'login-register' ), 'error', $captcha->get_error_message() );
+        }
+    }
 
     $account_type = sanitize_key( wp_unslash( $_POST['account_type'] ?? '' ) );
     $role = 'employer' === $account_type ? 'wpbb_job_employer' : 'wpbb_job_candidate';
@@ -566,6 +577,12 @@ function wpbb_jobs_handle_resume_save() {
     update_post_meta( $saved, '_wpbb_resume_headline', $headline );
     update_post_meta( $saved, '_wpbb_resume_phone', sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ) );
     update_post_meta( $saved, '_wpbb_resume_availability', sanitize_text_field( wp_unslash( $_POST['availability'] ?? '' ) ) );
+    update_post_meta( $saved, '_wpbb_resume_current_role', sanitize_text_field( wp_unslash( $_POST['current_role'] ?? '' ) ) );
+    update_post_meta( $saved, '_wpbb_resume_website', esc_url_raw( wp_unslash( $_POST['website'] ?? '' ) ) );
+    update_post_meta( $saved, '_wpbb_resume_linkedin_url', esc_url_raw( wp_unslash( $_POST['linkedin_url'] ?? '' ) ) );
+    update_post_meta( $saved, '_wpbb_resume_work_experience', sanitize_textarea_field( wp_unslash( $_POST['work_experience'] ?? '' ) ) );
+    update_post_meta( $saved, '_wpbb_resume_education', sanitize_textarea_field( wp_unslash( $_POST['education'] ?? '' ) ) );
+    update_post_meta( $saved, '_wpbb_resume_languages', sanitize_text_field( wp_unslash( $_POST['languages'] ?? '' ) ) );
     update_post_meta( $saved, '_wpbb_resume_visibility', 'employers' );
 
     foreach ( array( 'wpbb_job_category' => 'resume_category', 'wpbb_job_location' => 'resume_location' ) as $taxonomy => $field ) {
@@ -578,12 +595,23 @@ function wpbb_jobs_handle_resume_save() {
         wp_set_object_terms( $saved, $skill_terms, 'wpbb_job_skill', false );
     }
 
+    if ( ! empty( $_FILES['profile_image']['name'] ) && function_exists( 'wpbb_jobs_handle_profile_image_upload' ) ) {
+        $image_attachment = wpbb_jobs_handle_profile_image_upload( 'profile_image', $saved );
+        if ( is_wp_error( $image_attachment ) ) {
+            wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'create-resume' ), 'error', sprintf( __( 'Profile saved, but the profile image could not be uploaded: %s', 'wp-bbtheme-child' ), $image_attachment->get_error_message() ) );
+        }
+    }
+
     if ( ! empty( $_FILES['resume_file']['name'] ) ) {
         $attachment = wpbb_jobs_handle_document_upload( 'resume_file', $saved );
         if ( is_wp_error( $attachment ) ) {
             wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'create-resume' ), 'error', sprintf( __( 'Profile saved, but the CV could not be uploaded: %s', 'wp-bbtheme-child' ), $attachment->get_error_message() ) );
         }
         update_post_meta( $saved, '_wpbb_resume_file_id', $attachment );
+        if ( '' === trim( (string) get_post_field( 'post_content', $saved, 'raw' ) ) && function_exists( 'wpbb_jobs_extract_docx_text' ) ) {
+            $imported_text = wpbb_jobs_extract_docx_text( $attachment );
+            if ( $imported_text ) wp_update_post( array( 'ID' => $saved, 'post_content' => wp_kses_post( $imported_text ) ) );
+        }
     }
 
     wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'candidate-dashboard' ), 'success', __( 'Candidate profile saved.', 'wp-bbtheme-child' ) );
@@ -621,6 +649,12 @@ function wpbb_jobs_handle_application() {
     }
 
     $user_id = get_current_user_id();
+    if ( ! $user_id && function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
+        $captcha = wpbb_jobs_v86_verify_public_hcaptcha();
+        if ( is_wp_error( $captcha ) ) {
+            wpbb_jobs_redirect_with_notice( $return, 'error', $captcha->get_error_message() );
+        }
+    }
     $resume = $user_id ? wpbb_jobs_get_user_resume( $user_id ) : null;
     $name  = $user_id ? wp_get_current_user()->display_name : sanitize_text_field( wp_unslash( $_POST['applicant_name'] ?? '' ) );
     $email = $user_id ? wp_get_current_user()->user_email : sanitize_email( wp_unslash( $_POST['applicant_email'] ?? '' ) );
@@ -691,6 +725,7 @@ function wpbb_jobs_handle_application() {
     }
 
     wpbb_jobs_send_application_emails( $application_id );
+    do_action( 'wpbb_jobs_application_created', $application_id );
     wpbb_jobs_redirect_with_notice( $return, 'success', __( 'Application sent. You can track it from your candidate dashboard.', 'wp-bbtheme-child' ) );
 }
 add_action( 'admin_post_wpbb_jobs_apply', 'wpbb_jobs_handle_application' );
@@ -708,6 +743,7 @@ function wpbb_jobs_handle_application_status() {
     if ( ! isset( $statuses[ $status ] ) ) $status = 'reviewing';
     update_post_meta( $application_id, '_wpbb_application_status', $status );
     wpbb_jobs_send_status_email( $application_id, $status );
+    do_action( 'wpbb_jobs_application_status_changed', $application_id, $status );
     wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'employer-dashboard' ), 'success', __( 'Application status updated.', 'wp-bbtheme-child' ) );
 }
 add_action( 'admin_post_wpbb_jobs_application_status', 'wpbb_jobs_handle_application_status' );

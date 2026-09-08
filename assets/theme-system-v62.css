@@ -306,7 +306,7 @@ form label,.woocommerce form .form-row label{display:block;margin-bottom:.35rem;
 
 /* v3.8.10.74 suite consistency: cleaner rhythm, sector colour inheritance and robust cards. */
 :root {
-  --wpbb-v74-accent: #3155D9;
+  --wpbb-v74-accent: #078f6a;
   --wpbb-v74-accent-hover: #2442B4;
   --wpbb-v74-soft: #F3F6FD;
   --wpbb-v74-ink: #0B1739;

@@ -1,5 +1,81 @@
 # Changelog
 
+## 3.8.10.88
+- Fixes the literal `\\n` text appearing before the site header by correcting the Jobs favicon `<head>` output.
+- Widens header, homepage sections, newsletter and footer to a consistent 1400px desktop Jobs canvas, removing the excessive empty gutters visible on the live site.
+- Rebuilds the Homepage 1 hero composition so the supplied woman/city image is integrated into the right half of the hero with a soft blend instead of rendering as a narrow boxed column.
+- Simplifies the Homepage 1 hero search presentation to keyword + location + action while keeping full job-type/category filters on the Jobs results page.
+- Adds a dedicated **Post a job** header CTA and account action; Career Advice returns to a normal navigation item.
+- Enlarges category, salary, vacancy, journey and advice layouts to match the supplied marketplace proportions more closely.
+- Cleans guest application/public form file inputs, legal notice alignment and hCaptcha spacing.
+- Fixes the footer Newsletter Campaigns layout: one email row, visible consent checkbox, no parent generic form-notice collision, and responsive stacking on mobile.
+- Hardens Newsletter Campaigns hCaptcha test-mode detection for reverse proxies by checking forwarded/original host headers before allowing localhost test credentials.
+- Hides the duplicate simple BBuilder cookie banner when the parent theme privacy banner is already present, and removes remaining inherited blue primary controls from Jobs UI.
+- Refines Jobs dark mode around deep teal surfaces and mint/green actions.
+
+## 3.8.10.87
+- Finishes Homepage 1 against the supplied Jobs marketplace reference: integrated full-height hero visual, tighter search bar, metric strip, six-card category row, lighter salary band, compact featured jobs and advice cards, white footer and green newsletter band.
+- Removes the extra homepage employer showcase and generic CTA so the page rhythm follows the supplied reference while retaining **One marketplace, two clear journeys**.
+- Adds **High-volume Hiring Demo** / Homepage 2 as a real submenu under **For Employers** and inside the employer mega menu, so the previously-created managed page is discoverable from the public header.
+- Replaces remaining inherited royal-blue dark-mode surfaces with a coordinated deep-teal / mint / navy Jobs palette across the header, portals, dashboards, forms, Homepage 2, newsletter and footer.
+- Uses a cropped hero visual from the user-supplied design reference as the Homepage 1 demo hero asset.
+
+## 3.8.10.86
+
+- Finishes the public Jobs visual system against the supplied green/teal marketplace preview: hero, category row, salary block, featured jobs, inner-page surfaces, buttons and navigation.
+- Adds a new Jobs wordmark and matching favicon / Apple touch icon assets without changing the parent theme.
+- Removes inherited blue primary controls throughout the child theme while preserving LinkedIn's official sign-in blue as the intentional exception.
+- Reworks the footer into a green newsletter band followed by a white Jobs footer and adds dedicated WP Newsletter Campaigns form styling.
+- Keeps the newsletter GDPR/privacy consent checkbox visible and aligned across desktop/mobile layouts.
+- Uses WP BBuilder's saved hCaptcha configuration as the shared source for newsletter and Jobs public forms; no captcha secret is stored in the child theme.
+- Prevents WP Newsletter Campaigns from substituting its localhost hCaptcha test credentials when a complete BBuilder hCaptcha configuration is available.
+- Adds theme-styled modal hCaptcha plus server-side verification to anonymous account registration, guest job applications and the Homepage 2 high-volume qualifying form.
+- Adds 3.8.10.86 homepage, newsletter and captcha translations across DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS and bumps the managed-page repair marker so translations refresh once.
+- Preserves **One marketplace, two clear journeys**, LinkedIn/CV tools, high-volume A/B demo, applicant pipeline and CRM webhook features from 3.8.10.85.
+
+## 3.8.10.85
+
+- Rebuilt the Jobs presentation layer toward the supplied green marketplace preview while keeping the existing recruitment engine and managed multilingual pages.
+- Keeps the homepage **One marketplace, two clear journeys** candidate/employer section and moves the homepage rhythm to search → categories → salary → featured jobs → journeys → companies → advice.
+- Adds optional **LinkedIn OpenID Connect** sign-in with name, email and profile-photo prefill; credentials remain server-side in HR Jobs Settings.
+- Expands the candidate profile into a structured **CV builder** with profile image, current role, website, LinkedIn URL, languages, summary, work experience, education and original CV upload. DOCX uploads can best-effort seed editable CV text when the server has ZipArchive.
+- Adds multilingual **Homepage 2 / High-volume Hiring Demo** with a large qualifying CTA, role/location/type filtering and stable A/B landing-page variants (`?jobs_variant=a` / `?jobs_variant=b`).
+- Adds an employer **application pipeline** with stage cards and inline status changes for New, Reviewing, Shortlisted, Interview, Offer made and Hired.
+- Adds an optional **CRM webhook** for new applications and status changes, with an optional HMAC SHA-256 signature.
+- Extends the managed Polylang page set and Jobs translation dictionary for the new high-volume journey across EN, DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS.
+- Completes the earlier multilingual navigation, Contact, result-spacing and dark-mode polish.
+- Parent theme remains unchanged.
+
+## 3.8.10.84
+
+- Jobs-only multilingual polish: rebuilt managed translated pages from the current local theme assets so hero and journey images no longer retain stale/broken URLs.
+- Simplified the desktop header to six primary destinations; About/Contact move to the utility/footer menus and Salary Guide sits under For Candidates.
+- Added a consistent separator/rhythm between the Jobs filters and the first vacancy row.
+- Rebuilt Contact as four matching contact-method cards plus a clean recruitment enquiry form.
+- Added a complete Jobs dark-mode layer for header, footer/newsletter, cards, forms, search, salary tools and contact surfaces.
+- Parent theme remains unchanged.
+
+## 3.8.10.83
+
+- Refined the Jobs homepage into a calmer, more business-focused recruitment design across every supported language.
+- Reduced oversized hero/section typography and softened borders, shadows and background treatments.
+- Rebalanced the hero image/search layout, metrics, categories, companies, salary planner, vacancy cards, candidate/employer routes and career-advice cards.
+- Kept multilingual layout parity: EN, DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS use the same component geometry and responsive rules.
+- Preserves the 3.8.10.82 menu repair, 3.8.10.80 password controls and all integrated recruitment functionality.
+
+## 3.8.10.82
+
+- Jobs-only managed navigation repair. Removes duplicate/triplicate managed Header, Utility and Footer items left by earlier demo refreshes.
+- Rebuilds all Polylang Jobs menus from the cleaned English managed menu so Latvian, Russian and the remaining translated menus stay in parity.
+- Adds a frontend de-duplication guard for managed Jobs menus so stale duplicate menu rows can never render three times.
+- Tightens the desktop Jobs header spacing for longer translated navigation labels while preserving the normal mobile drawer breakpoint.
+- Parent theme remains unchanged.
+
+## 3.8.10.81
+- Keeps Theme Settings saves and WordPress theme update/upload requests responsive by pausing legacy child-owned demo/media migration callbacks for those interactive requests.
+- Keeps the working 3.8.10.80 Frontend Password Protection controls unchanged.
+- Parent theme is unchanged.
+
 ## 3.8.10.80
 
 - Rebuilds every Starter Setup-managed Jobs homepage translation from the same search-led BBuilder structure as English.

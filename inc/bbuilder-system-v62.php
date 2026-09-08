@@ -717,7 +717,9 @@ if ( ! function_exists( 'wpbb_child_v71_canonical_home_content' ) ) {
 
 if ( ! function_exists( 'wpbb_child_v71_canonical_page_content' ) ) {
     function wpbb_child_v71_canonical_page_content( $slug, $profile ) {
-        if ( function_exists( 'wp_theme_sector_page_content' ) ) {
+        if ( 'contact' === $slug && function_exists( 'wpbb_jobs_v84_contact_page_content' ) && 'jobs' === sanitize_key( (string) ( $profile['id'] ?? '' ) ) ) {
+            $content = (string) wpbb_jobs_v84_contact_page_content( $profile );
+        } elseif ( function_exists( 'wp_theme_sector_page_content' ) ) {
             $content = (string) wp_theme_sector_page_content( $slug, $profile );
         } else {
             $content = function_exists( 'wpbb_child_v62_simple_page_content' ) ? (string) wpbb_child_v62_simple_page_content( $profile, $slug ) : '';
@@ -753,24 +755,24 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
         $front      = absint( get_option( 'page_on_front' ) );
         $front_content = $front ? (string) get_post_field( 'post_content', $front, 'raw' ) : '';
         $placeholder = $front && wpbb_child_v62_has_placeholder_dynamic_blocks( $front_content );
-        $already = '3.8.10.80' === (string) get_option( $done_key );
+        $already = '3.8.10.86' === (string) get_option( $done_key );
         if ( ! $force && ! $placeholder && $already ) return;
 
         $profile = wpbb_child_v71_demo_profile();
         if ( empty( $profile['id'] ) ) {
-            update_option( $done_key, '3.8.10.80', false );
+            update_option( $done_key, '3.8.10.86', false );
             return;
         }
 
         $source_ids = array();
 
         if ( $front && wpbb_child_v62_is_managed_demo_page( $front ) && wpbb_child_v71_is_source_language( $front ) ) {
-            $needs_refresh = $force || $placeholder || '3.8.10.80' !== (string) get_post_meta( $front, '_wpbb_child_bbuilder_version', true );
+            $needs_refresh = $force || $placeholder || '3.8.10.86' !== (string) get_post_meta( $front, '_wpbb_child_bbuilder_version', true );
             if ( $needs_refresh ) {
                 $clean = wpbb_child_v71_canonical_home_content( $profile );
                 if ( '' !== trim( $clean ) ) {
                     wp_update_post( array( 'ID' => $front, 'post_content' => $clean ) );
-                    update_post_meta( $front, '_wpbb_child_bbuilder_version', '3.8.10.80' );
+                    update_post_meta( $front, '_wpbb_child_bbuilder_version', '3.8.10.86' );
                     update_post_meta( $front, '_wp_theme_demo_managed', '1' );
                     clean_post_cache( $front );
                 }
@@ -781,12 +783,12 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
         foreach ( array( 'about', 'services', 'industries', 'contact' ) as $slug ) {
             $page = get_page_by_path( $slug );
             if ( ! $page instanceof WP_Post || ! wpbb_child_v62_is_managed_demo_page( $page->ID ) || ! wpbb_child_v71_is_source_language( $page->ID ) ) continue;
-            $needs_refresh = $force || '3.8.10.80' !== (string) get_post_meta( $page->ID, '_wpbb_child_bbuilder_version', true );
+            $needs_refresh = $force || '3.8.10.86' !== (string) get_post_meta( $page->ID, '_wpbb_child_bbuilder_version', true );
             if ( $needs_refresh ) {
                 $clean = wpbb_child_v71_canonical_page_content( $slug, $profile );
                 if ( '' !== trim( $clean ) ) {
                     wp_update_post( array( 'ID' => $page->ID, 'post_content' => $clean ) );
-                    update_post_meta( $page->ID, '_wpbb_child_bbuilder_version', '3.8.10.80' );
+                    update_post_meta( $page->ID, '_wpbb_child_bbuilder_version', '3.8.10.86' );
                     update_post_meta( $page->ID, '_wp_theme_demo_managed', '1' );
                     clean_post_cache( $page->ID );
                 }
@@ -811,7 +813,7 @@ if ( ! function_exists( 'wpbb_child_v62_rebuild_demo_pages' ) ) {
         if ( function_exists( 'wp_theme_create_demo_polylang_menus' ) ) {
             wp_theme_create_demo_polylang_menus( $profile );
         }
-        update_option( $done_key, '3.8.10.80', false );
+        update_option( $done_key, '3.8.10.86', false );
     }
     add_action( 'admin_init', 'wpbb_child_v62_rebuild_demo_pages', 80 );
 }
