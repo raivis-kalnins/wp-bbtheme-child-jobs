@@ -5,7 +5,7 @@ defined( 'ABSPATH' ) || exit;
 
 function wpbb_jobs_term_name( $post_id, $taxonomy ) {
     $terms = wp_get_post_terms( $post_id, $taxonomy );
-    return ( $terms && ! is_wp_error( $terms ) ) ? $terms[0]->name : '';
+    return ( $terms && ! is_wp_error( $terms ) ) ? ( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $terms[0]->name ) : $terms[0]->name ) : '';
 }
 
 function wpbb_jobs_term_id( $post_id, $taxonomy ) {
@@ -46,14 +46,14 @@ function wpbb_jobs_search_form( $atts = array() ) {
             <label for="wpbb-job-location"><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?></label>
             <select id="wpbb-job-location" name="job_location">
                 <option value=""><?php esc_html_e( 'Any location', 'wp-bbtheme-child' ); ?></option>
-                <?php foreach ( $locations as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?>
+                <?php foreach ( $locations as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?>
             </select>
         </div>
         <div class="wpbb-jobs-search__field">
             <label for="wpbb-job-type"><?php esc_html_e( 'Job type', 'wp-bbtheme-child' ); ?></label>
             <select id="wpbb-job-type" name="job_type">
                 <option value=""><?php esc_html_e( 'Any type', 'wp-bbtheme-child' ); ?></option>
-                <?php foreach ( $types as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $type, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?>
+                <?php foreach ( $types as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $type, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?>
             </select>
         </div>
         <?php if ( empty( $atts['compact'] ) ) : ?>
@@ -61,7 +61,7 @@ function wpbb_jobs_search_form( $atts = array() ) {
                 <label for="wpbb-job-category"><?php esc_html_e( 'Category', 'wp-bbtheme-child' ); ?></label>
                 <select id="wpbb-job-category" name="job_category">
                     <option value=""><?php esc_html_e( 'Any category', 'wp-bbtheme-child' ); ?></option>
-                    <?php foreach ( $categories as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?>
+                    <?php foreach ( $categories as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?>
                 </select>
             </div>
         <?php endif; ?>
@@ -129,14 +129,14 @@ function wpbb_jobs_render_job_card( $job ) {
                 <?php if ( $type ) : ?><span class="wpbb-jobs-chip"><?php echo esc_html( $type ); ?></span><?php endif; ?>
                 <?php if ( $remote ) : ?><span class="wpbb-jobs-chip"><?php esc_html_e( 'Remote friendly', 'wp-bbtheme-child' ); ?></span><?php endif; ?>
             </div>
-            <h3 class="wpbb-jobs-card__title"><a href="<?php echo esc_url( get_permalink( $job ) ); ?>"><?php echo esc_html( get_the_title( $job ) ); ?></a></h3>
+            <h3 class="wpbb-jobs-card__title"><a href="<?php echo esc_url( get_permalink( $job ) ); ?>"><?php echo esc_html( function_exists( 'wpbb_jobs_localized_post_title' ) ? wpbb_jobs_localized_post_title( $job ) : get_the_title( $job ) ); ?></a></h3>
             <p class="wpbb-jobs-card__company"><?php echo esc_html( $company instanceof WP_Post ? $company->post_title : get_bloginfo( 'name' ) ); ?></p>
             <div class="wpbb-jobs-card__meta">
                 <?php if ( $location ) : ?><span><?php echo esc_html( $location ); ?></span><?php endif; ?>
                 <?php if ( $salary ) : ?><span><?php echo esc_html( $salary ); ?></span><?php endif; ?>
                 <span><?php echo esc_html( sprintf( __( '%s ago', 'wp-bbtheme-child' ), human_time_diff( get_post_time( 'U', true, $job ), current_time( 'timestamp', true ) ) ) ); ?></span>
             </div>
-            <?php if ( $job->post_excerpt ) : ?><p class="wpbb-jobs-card__excerpt"><?php echo esc_html( wp_trim_words( $job->post_excerpt, 24 ) ); ?></p><?php endif; ?>
+            <?php $localized_excerpt = function_exists( 'wpbb_jobs_localized_post_excerpt' ) ? wpbb_jobs_localized_post_excerpt( $job ) : $job->post_excerpt; if ( $localized_excerpt ) : ?><p class="wpbb-jobs-card__excerpt"><?php echo esc_html( wp_trim_words( $localized_excerpt, 24 ) ); ?></p><?php endif; ?>
             <a class="wpbb-jobs-card__link" href="<?php echo esc_url( get_permalink( $job ) ); ?>"><?php esc_html_e( 'View job', 'wp-bbtheme-child' ); ?> <span aria-hidden="true">→</span></a>
         </div>
     </article>
@@ -193,7 +193,7 @@ function wpbb_jobs_render_company_card( $company ) {
         <div>
             <h3><a href="<?php echo esc_url( get_permalink( $company ) ); ?>"><?php echo esc_html( $company->post_title ); ?></a></h3>
             <?php if ( $location ) : ?><p class="wpbb-jobs-company-card__location"><?php echo esc_html( $location ); ?></p><?php endif; ?>
-            <p><?php echo esc_html( wp_trim_words( $company->post_excerpt ?: wp_strip_all_tags( $company->post_content ), 22 ) ); ?></p>
+            <p><?php $company_excerpt = function_exists( 'wpbb_jobs_localized_post_excerpt' ) ? wpbb_jobs_localized_post_excerpt( $company ) : $company->post_excerpt; echo esc_html( wp_trim_words( $company_excerpt ?: wp_strip_all_tags( $company->post_content ), 22 ) ); ?></p>
             <a class="wpbb-jobs-card__link" href="<?php echo esc_url( get_permalink( $company ) ); ?>"><?php echo esc_html( sprintf( _n( '%d open job', '%d open jobs', $count, 'wp-bbtheme-child' ), $count ) ); ?> →</a>
         </div>
     </article>
@@ -302,7 +302,7 @@ function wpbb_jobs_company_form( $company_id = 0 ) {
             <label><?php esc_html_e( 'Website', 'wp-bbtheme-child' ); ?><input type="url" name="company_website" value="<?php echo esc_attr( $company ? get_post_meta( $company->ID, '_wpbb_company_website', true ) : '' ); ?>" /></label>
             <label><?php esc_html_e( 'Hiring email', 'wp-bbtheme-child' ); ?><input type="email" name="company_email" value="<?php echo esc_attr( $company ? get_post_meta( $company->ID, '_wpbb_company_email', true ) : wp_get_current_user()->user_email ); ?>" /></label>
             <label><?php esc_html_e( 'Phone', 'wp-bbtheme-child' ); ?><input name="company_phone" value="<?php echo esc_attr( $company ? get_post_meta( $company->ID, '_wpbb_company_phone', true ) : '' ); ?>" /></label>
-            <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="company_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( $locations as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?></select></label>
+            <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="company_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( $locations as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
         </div>
         <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Save company', 'wp-bbtheme-child' ); ?></button>
     </form><?php
@@ -328,9 +328,9 @@ function wpbb_jobs_job_form( $job_id = 0 ) {
         <label><?php esc_html_e( 'Job title', 'wp-bbtheme-child' ); ?><input name="job_title" required value="<?php echo esc_attr( $job ? $job->post_title : '' ); ?>" /></label>
         <div class="wpbb-jobs-form__grid">
             <label><?php esc_html_e( 'Company', 'wp-bbtheme-child' ); ?><select name="company_id" required><option value=""><?php esc_html_e( 'Choose company', 'wp-bbtheme-child' ); ?></option><?php foreach ( $companies as $id ) : ?><option value="<?php echo esc_attr( $id ); ?>" <?php selected( $company_id, $id ); ?>><?php echo esc_html( get_the_title( $id ) ); ?></option><?php endforeach; ?></select></label>
-            <label><?php esc_html_e( 'Category', 'wp-bbtheme-child' ); ?><select name="job_category"><option value=""><?php esc_html_e( 'Choose category', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_category' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category_id, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?></select></label>
-            <label><?php esc_html_e( 'Job type', 'wp-bbtheme-child' ); ?><select name="job_type"><option value=""><?php esc_html_e( 'Choose type', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_type' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $type_id, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?></select></label>
-            <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="job_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_location' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?></select></label>
+            <label><?php esc_html_e( 'Category', 'wp-bbtheme-child' ); ?><select name="job_category"><option value=""><?php esc_html_e( 'Choose category', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_category' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
+            <label><?php esc_html_e( 'Job type', 'wp-bbtheme-child' ); ?><select name="job_type"><option value=""><?php esc_html_e( 'Choose type', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_type' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $type_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
+            <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="job_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_location' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
             <label><?php esc_html_e( 'Salary from', 'wp-bbtheme-child' ); ?><input type="number" step="1" name="salary_min" value="<?php echo esc_attr( $job ? get_post_meta( $job->ID, '_wpbb_job_salary_min', true ) : '' ); ?>" /></label>
             <label><?php esc_html_e( 'Salary to', 'wp-bbtheme-child' ); ?><input type="number" step="1" name="salary_max" value="<?php echo esc_attr( $job ? get_post_meta( $job->ID, '_wpbb_job_salary_max', true ) : '' ); ?>" /></label>
             <label><?php esc_html_e( 'Currency', 'wp-bbtheme-child' ); ?><input name="currency" maxlength="3" value="<?php echo esc_attr( $job ? ( get_post_meta( $job->ID, '_wpbb_job_currency', true ) ?: wpbb_jobs_setting( 'currency', 'GBP' ) ) : wpbb_jobs_setting( 'currency', 'GBP' ) ); ?>" /></label>
@@ -360,8 +360,8 @@ function wpbb_jobs_resume_form() {
             <label><?php esc_html_e( 'Professional headline', 'wp-bbtheme-child' ); ?><input name="headline" required value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_headline', true ) : '' ); ?>" /></label>
             <label><?php esc_html_e( 'Phone', 'wp-bbtheme-child' ); ?><input name="phone" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_phone', true ) : '' ); ?>" /></label>
             <label><?php esc_html_e( 'Availability', 'wp-bbtheme-child' ); ?><input name="availability" value="<?php echo esc_attr( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_availability', true ) : '' ); ?>" placeholder="<?php esc_attr_e( 'e.g. 1 month notice', 'wp-bbtheme-child' ); ?>" /></label>
-            <label><?php esc_html_e( 'Primary discipline', 'wp-bbtheme-child' ); ?><select name="resume_category"><option value=""><?php esc_html_e( 'Choose category', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_category' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category_id, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?></select></label>
-            <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="resume_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_location' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?></select></label>
+            <label><?php esc_html_e( 'Primary discipline', 'wp-bbtheme-child' ); ?><select name="resume_category"><option value=""><?php esc_html_e( 'Choose category', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_category' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $category_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
+            <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="resume_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( wpbb_jobs_get_terms_options( 'wpbb_job_location' ) as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
         </div>
         <label><?php esc_html_e( 'Skills (comma separated)', 'wp-bbtheme-child' ); ?><input name="skills" value="<?php echo esc_attr( ( $skills && ! is_wp_error( $skills ) ) ? implode( ', ', $skills ) : '' ); ?>" /></label>
         <label><?php esc_html_e( 'Profile summary / experience', 'wp-bbtheme-child' ); ?><textarea name="resume_summary" rows="10"><?php echo esc_textarea( $resume ? $resume->post_content : '' ); ?></textarea></label>
@@ -529,6 +529,7 @@ function wpbb_jobs_single_job_view( $job_id = 0 ) {
     if ( is_wp_error( $skills ) ) $skills = array();
 
     $description = (string) get_post_field( 'post_content', $job_id, 'raw' );
+    $description = function_exists( 'wpbb_jobs_localized_demo_html' ) ? wpbb_jobs_localized_demo_html( $description, $job_id ) : $description;
     $description = has_blocks( $description ) ? do_blocks( $description ) : wpautop( $description );
 
     ob_start();
@@ -544,8 +545,8 @@ function wpbb_jobs_single_job_view( $job_id = 0 ) {
                             <?php if ( $type ) : ?><span class="wpbb-jobs-chip"><?php echo esc_html( $type ); ?></span><?php endif; ?>
                             <?php if ( $remote ) : ?><span class="wpbb-jobs-chip"><?php esc_html_e( 'Remote friendly', 'wp-bbtheme-child' ); ?></span><?php endif; ?>
                         </div>
-                        <h1><?php echo esc_html( get_the_title( $job_id ) ); ?></h1>
-                        <p class="wp-theme-sector-lead"><?php echo esc_html( $job->post_excerpt ?: sprintf( __( 'Explore this opportunity with %s.', 'wp-bbtheme-child' ), $company instanceof WP_Post ? $company->post_title : get_bloginfo( 'name' ) ) ); ?></p>
+                        <h1><?php echo esc_html( function_exists( 'wpbb_jobs_localized_post_title' ) ? wpbb_jobs_localized_post_title( $job ) : get_the_title( $job_id ) ); ?></h1>
+                        <p class="wp-theme-sector-lead"><?php $lead = function_exists( 'wpbb_jobs_localized_post_excerpt' ) ? wpbb_jobs_localized_post_excerpt( $job ) : $job->post_excerpt; echo esc_html( $lead ?: sprintf( __( 'Explore this opportunity with %s.', 'wp-bbtheme-child' ), $company instanceof WP_Post ? $company->post_title : get_bloginfo( 'name' ) ) ); ?></p>
                     </div>
                     <a class="wpbb-jobs-button wpbb-jobs-single-hero__apply" href="#apply"><?php esc_html_e( 'Apply now', 'wp-bbtheme-child' ); ?></a>
                 </div>
@@ -566,7 +567,7 @@ function wpbb_jobs_single_job_view( $job_id = 0 ) {
                         </div>
                         <div class="wpbb-jobs-job-description wpbb-jobs-panel">
                             <?php echo wp_kses_post( $description ); ?>
-                            <?php if ( $skills ) : ?><div class="wpbb-jobs-job-skills"><h2><?php esc_html_e( 'Useful skills', 'wp-bbtheme-child' ); ?></h2><div><?php foreach ( $skills as $skill ) : ?><span class="wpbb-jobs-chip"><?php echo esc_html( $skill ); ?></span><?php endforeach; ?></div></div><?php endif; ?>
+                            <?php if ( $skills ) : ?><div class="wpbb-jobs-job-skills"><h2><?php esc_html_e( 'Useful skills', 'wp-bbtheme-child' ); ?></h2><div><?php foreach ( $skills as $skill ) : ?><span class="wpbb-jobs-chip"><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $skill ) : $skill ); ?></span><?php endforeach; ?></div></div><?php endif; ?>
                         </div>
                     </article>
                     <aside id="apply" class="wpbb-jobs-single-sidebar">
@@ -598,6 +599,7 @@ function wpbb_jobs_single_company_view( $company_id = 0 ) {
     }
     $website = (string) get_post_meta( $company_id, '_wpbb_company_website', true );
     $description = (string) get_post_field( 'post_content', $company_id, 'raw' );
+    $description = function_exists( 'wpbb_jobs_localized_demo_html' ) ? wpbb_jobs_localized_demo_html( $description, $company_id ) : $description;
     $description = has_blocks( $description ) ? do_blocks( $description ) : wpautop( $description );
     $jobs = get_posts( array(
         'post_type' => 'wpbb_job', 'post_status' => 'publish', 'posts_per_page' => 12,
@@ -612,3 +614,197 @@ function wpbb_jobs_single_company_view( $company_id = 0 ) {
     return (string) ob_get_clean();
 }
 add_shortcode( 'wpbb_company_single', static function() { return wpbb_jobs_single_company_view(); } );
+
+/**
+ * v3.8.10.78 homepage discovery blocks and salary tools.
+ */
+function wpbb_jobs_count_open_jobs( $term_id = 0 ) {
+    $args = array(
+        'post_type' => 'wpbb_job',
+        'post_status' => 'publish',
+        'posts_per_page' => 1,
+        'fields' => 'ids',
+        'meta_query' => array(
+            'relation' => 'AND',
+            array(
+                'relation' => 'OR',
+                array( 'key' => '_wpbb_job_status', 'compare' => 'NOT EXISTS' ),
+                array( 'key' => '_wpbb_job_status', 'value' => 'closed', 'compare' => '!=' ),
+            ),
+            array(
+                'relation' => 'OR',
+                array( 'key' => '_wpbb_job_deadline', 'compare' => 'NOT EXISTS' ),
+                array( 'key' => '_wpbb_job_deadline', 'value' => '', 'compare' => '=' ),
+                array( 'key' => '_wpbb_job_deadline', 'value' => wp_date( 'Y-m-d' ), 'compare' => '>=', 'type' => 'DATE' ),
+            ),
+        ),
+    );
+    if ( $term_id ) {
+        $args['tax_query'] = array( array( 'taxonomy' => 'wpbb_job_category', 'field' => 'term_id', 'terms' => array( absint( $term_id ) ) ) );
+    }
+    $query = new WP_Query( $args );
+    return (int) $query->found_posts;
+}
+
+function wpbb_jobs_categories_grid( $atts = array() ) {
+    $atts = wp_parse_args( $atts, array( 'limit' => 8 ) );
+    $terms = get_terms( array( 'taxonomy' => 'wpbb_job_category', 'hide_empty' => false, 'orderby' => 'name', 'order' => 'ASC' ) );
+    if ( is_wp_error( $terms ) || ! $terms ) return '<div class="wpbb-jobs-empty">' . esc_html__( 'Job categories will appear here when vacancies are published.', 'wp-bbtheme-child' ) . '</div>';
+    $items = array();
+    foreach ( $terms as $term ) {
+        $count = wpbb_jobs_count_open_jobs( $term->term_id );
+        if ( ! $count ) continue;
+        $items[] = array( 'term' => $term, 'count' => $count );
+    }
+    usort( $items, static function( $a, $b ) { return $b['count'] <=> $a['count']; } );
+    $items = array_slice( $items, 0, max( 1, min( 12, absint( $atts['limit'] ) ) ) );
+    $icons = array( 'Technology' => '⌘', 'Design' => '✦', 'Operations' => '↗', 'Customer Success' => '◎', 'People & HR' => '♟', 'Sales' => '↗', 'Finance' => '£', 'Marketing' => '◉', 'Project Management' => '✓', 'Legal & Compliance' => '§' );
+    ob_start(); ?>
+    <div class="wpbb-jobs-category-grid">
+        <?php foreach ( $items as $item ) : $term = $item['term']; ?>
+            <a class="wpbb-jobs-category-card" href="<?php echo esc_url( add_query_arg( 'job_category', $term->term_id, wpbb_jobs_page_url( 'jobs' ) ) ); ?>">
+                <span class="wpbb-jobs-category-card__icon" aria-hidden="true"><?php echo esc_html( $icons[ $term->name ] ?? '•' ); ?></span>
+                <span class="wpbb-jobs-category-card__title"><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></span>
+                <span class="wpbb-jobs-category-card__count"><?php echo esc_html( sprintf( _n( '%d job', '%d jobs', $item['count'], 'wp-bbtheme-child' ), $item['count'] ) ); ?></span>
+            </a>
+        <?php endforeach; ?>
+    </div>
+    <?php return ob_get_clean();
+}
+
+function wpbb_jobs_home_metrics() {
+    $jobs = wpbb_jobs_count_open_jobs();
+    $companies = (int) wp_count_posts( 'wpbb_company' )->publish;
+    $locations = get_terms( array( 'taxonomy' => 'wpbb_job_location', 'hide_empty' => true, 'fields' => 'count' ) );
+    $locations = is_wp_error( $locations ) ? 0 : (int) $locations;
+    ob_start(); ?>
+    <div class="wpbb-jobs-home-metrics">
+        <div><strong><?php echo esc_html( number_format_i18n( $jobs ) ); ?>+</strong><span><?php esc_html_e( 'open opportunities', 'wp-bbtheme-child' ); ?></span></div>
+        <div><strong><?php echo esc_html( number_format_i18n( $companies ) ); ?>+</strong><span><?php esc_html_e( 'hiring employers', 'wp-bbtheme-child' ); ?></span></div>
+        <div><strong><?php echo esc_html( number_format_i18n( $locations ) ); ?>+</strong><span><?php esc_html_e( 'locations & remote', 'wp-bbtheme-child' ); ?></span></div>
+        <div><strong>2026/27</strong><span><?php esc_html_e( 'salary calculator', 'wp-bbtheme-child' ); ?></span></div>
+    </div>
+    <?php return ob_get_clean();
+}
+
+function wpbb_jobs_salary_benchmarks( $atts = array() ) {
+    $atts = wp_parse_args( $atts, array( 'limit' => 6 ) );
+    $terms = get_terms( array( 'taxonomy' => 'wpbb_job_category', 'hide_empty' => false, 'orderby' => 'name', 'order' => 'ASC' ) );
+    if ( is_wp_error( $terms ) || ! $terms ) return '';
+    $rows = array();
+    foreach ( $terms as $term ) {
+        $ids = get_posts( array(
+            'post_type' => 'wpbb_job', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids',
+            'tax_query' => array( array( 'taxonomy' => 'wpbb_job_category', 'field' => 'term_id', 'terms' => array( $term->term_id ) ) ),
+        ) );
+        $midpoints = array();
+        foreach ( $ids as $job_id ) {
+            $min = (float) get_post_meta( $job_id, '_wpbb_job_salary_min', true );
+            $max = (float) get_post_meta( $job_id, '_wpbb_job_salary_max', true );
+            if ( $min || $max ) $midpoints[] = $min && $max ? ( $min + $max ) / 2 : max( $min, $max );
+        }
+        if ( ! $midpoints ) continue;
+        $rows[] = array( 'term' => $term, 'average' => array_sum( $midpoints ) / count( $midpoints ), 'count' => count( $midpoints ) );
+    }
+    usort( $rows, static function( $a, $b ) { return $b['count'] <=> $a['count']; } );
+    $rows = array_slice( $rows, 0, max( 1, min( 10, absint( $atts['limit'] ) ) ) );
+    ob_start(); ?>
+    <div class="wpbb-jobs-salary-benchmarks">
+        <?php foreach ( $rows as $row ) : ?>
+            <a href="<?php echo esc_url( add_query_arg( 'job_category', $row['term']->term_id, wpbb_jobs_page_url( 'jobs' ) ) ); ?>" class="wpbb-jobs-salary-benchmark">
+                <span><strong><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $row['term']->name ) : $row['term']->name ); ?></strong><small><?php echo esc_html( sprintf( _n( '%d live role', '%d live roles', $row['count'], 'wp-bbtheme-child' ), $row['count'] ) ); ?></small></span>
+                <strong><?php echo esc_html( wpbb_jobs_money( round( $row['average'] / 500 ) * 500, 'GBP' ) ); ?></strong>
+            </a>
+        <?php endforeach; ?>
+    </div>
+    <p class="wpbb-jobs-data-note"><?php esc_html_e( 'Demo salary benchmarks are calculated from the currently published vacancies on this site, not from external market data.', 'wp-bbtheme-child' ); ?></p>
+    <?php return ob_get_clean();
+}
+
+function wpbb_jobs_salary_calculator() {
+    ob_start(); ?>
+    <div class="wpbb-jobs-salary-calculator" data-wpbb-salary-calculator>
+        <div class="wpbb-jobs-salary-calculator__form">
+            <div>
+                <span class="wp-theme-sector-eyebrow"><?php esc_html_e( 'Take-home pay estimator', 'wp-bbtheme-child' ); ?></span>
+                <h3><?php esc_html_e( 'What could that salary mean each month?', 'wp-bbtheme-child' ); ?></h3>
+                <p><?php esc_html_e( 'Enter an annual salary for an illustrative 2026/27 PAYE estimate.', 'wp-bbtheme-child' ); ?></p>
+            </div>
+            <label><?php esc_html_e( 'Annual gross salary', 'wp-bbtheme-child' ); ?><span class="wpbb-jobs-money-input"><span>£</span><input type="number" min="0" step="500" value="45000" data-salary-gross /></span></label>
+            <label><?php esc_html_e( 'Tax region', 'wp-bbtheme-child' ); ?><select data-salary-region><option value="rUK"><?php esc_html_e( 'England, Wales or Northern Ireland', 'wp-bbtheme-child' ); ?></option><option value="scotland"><?php esc_html_e( 'Scotland', 'wp-bbtheme-child' ); ?></option></select></label>
+            <label><?php esc_html_e( 'Salary-sacrifice pension', 'wp-bbtheme-child' ); ?><span class="wpbb-jobs-percent-input"><input type="number" min="0" max="30" step="1" value="5" data-salary-pension /><span>%</span></span></label>
+            <button type="button" class="wpbb-jobs-button" data-salary-calculate><?php esc_html_e( 'Calculate take-home pay', 'wp-bbtheme-child' ); ?></button>
+        </div>
+        <div class="wpbb-jobs-salary-calculator__results" aria-live="polite">
+            <div class="wpbb-jobs-salary-result is-primary"><span><?php esc_html_e( 'Estimated monthly take-home', 'wp-bbtheme-child' ); ?></span><strong data-salary-monthly>£0</strong></div>
+            <div class="wpbb-jobs-salary-result"><span><?php esc_html_e( 'Estimated annual take-home', 'wp-bbtheme-child' ); ?></span><strong data-salary-annual>£0</strong></div>
+            <div class="wpbb-jobs-salary-result"><span><?php esc_html_e( 'Income tax', 'wp-bbtheme-child' ); ?></span><strong data-salary-tax>£0</strong></div>
+            <div class="wpbb-jobs-salary-result"><span><?php esc_html_e( 'Employee National Insurance', 'wp-bbtheme-child' ); ?></span><strong data-salary-ni>£0</strong></div>
+            <div class="wpbb-jobs-salary-result"><span><?php esc_html_e( 'Salary-sacrifice pension', 'wp-bbtheme-child' ); ?></span><strong data-salary-pension-out>£0</strong></div>
+        </div>
+        <p class="wpbb-jobs-salary-disclaimer"><?php esc_html_e( 'Illustrative estimate only. It assumes standard employment income and does not account for individual tax codes, student loans, benefits, bonuses or other deductions. Check current HMRC guidance or professional advice for personal decisions.', 'wp-bbtheme-child' ); ?></p>
+    </div>
+    <?php return ob_get_clean();
+}
+
+add_action( 'init', static function() {
+    add_shortcode( 'wpbb_job_categories', static function( $atts ) { return wpbb_jobs_categories_grid( shortcode_atts( array( 'limit' => 8 ), $atts ) ); } );
+    add_shortcode( 'wpbb_jobs_home_metrics', static function() { return wpbb_jobs_home_metrics(); } );
+    add_shortcode( 'wpbb_salary_guide', static function( $atts ) { return wpbb_jobs_salary_benchmarks( shortcode_atts( array( 'limit' => 6 ), $atts ) ); } );
+    add_shortcode( 'wpbb_salary_calculator', static function() { return wpbb_jobs_salary_calculator(); } );
+}, 22 );
+
+add_action( 'init', static function() {
+    if ( ! wp_script_is( 'wpbb-jobs-blocks', 'registered' ) ) return;
+    $common = array( 'api_version' => 2, 'editor_script' => 'wpbb-jobs-blocks' );
+    register_block_type( 'wpbb-jobs/categories', array_merge( $common, array(
+        'attributes' => array( 'limit' => array( 'type' => 'number', 'default' => 8 ) ),
+        'render_callback' => static function( $attrs ) { return wpbb_jobs_categories_grid( array( 'limit' => $attrs['limit'] ?? 8 ) ); },
+    ) ) );
+    register_block_type( 'wpbb-jobs/home-metrics', array_merge( $common, array(
+        'attributes' => array(), 'render_callback' => static function() { return wpbb_jobs_home_metrics(); },
+    ) ) );
+    register_block_type( 'wpbb-jobs/salary-guide', array_merge( $common, array(
+        'attributes' => array( 'limit' => array( 'type' => 'number', 'default' => 6 ) ),
+        'render_callback' => static function( $attrs ) { return wpbb_jobs_salary_benchmarks( array( 'limit' => $attrs['limit'] ?? 6 ) ); },
+    ) ) );
+    register_block_type( 'wpbb-jobs/salary-calculator', array_merge( $common, array(
+        'attributes' => array(), 'render_callback' => static function() { return wpbb_jobs_salary_calculator(); },
+    ) ) );
+}, 31 );
+
+function wpbb_jobs_career_advice_cards( $atts = array() ) {
+    $atts = wp_parse_args( $atts, array( 'limit' => 3 ) );
+    $query = new WP_Query( array( 'post_type' => 'post', 'post_status' => 'publish', 'posts_per_page' => max( 1, min( 6, absint( $atts['limit'] ) ) ), 'orderby' => 'date', 'order' => 'DESC' ) );
+    if ( ! $query->have_posts() ) return '';
+    ob_start(); ?>
+    <div class="wpbb-jobs-advice-grid">
+        <?php while ( $query->have_posts() ) : $query->the_post(); ?>
+            <article class="wpbb-jobs-advice-card">
+                <a class="wpbb-jobs-advice-card__image" href="<?php the_permalink(); ?>">
+                    <?php if ( has_post_thumbnail() ) { the_post_thumbnail( 'medium_large', array( 'loading' => 'lazy' ) ); } else { echo '<span class="wpbb-jobs-advice-card__placeholder" aria-hidden="true">↗</span>'; } ?>
+                </a>
+                <div class="wpbb-jobs-advice-card__body">
+                    <span class="wpbb-jobs-advice-card__meta"><?php echo esc_html( get_the_date() ); ?></span>
+                    <h3><a href="<?php the_permalink(); ?>"><?php echo esc_html( function_exists( 'wpbb_jobs_localized_post_title' ) ? wpbb_jobs_localized_post_title( get_post() ) : get_the_title() ); ?></a></h3>
+                    <p><?php $advice_excerpt = function_exists( 'wpbb_jobs_localized_post_excerpt' ) ? wpbb_jobs_localized_post_excerpt( get_post() ) : get_the_excerpt(); echo esc_html( wp_trim_words( $advice_excerpt, 18 ) ); ?></p>
+                    <a class="wpbb-jobs-card__link" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Read advice', 'wp-bbtheme-child' ); ?> →</a>
+                </div>
+            </article>
+        <?php endwhile; wp_reset_postdata(); ?>
+    </div>
+    <?php return ob_get_clean();
+}
+
+add_action( 'init', static function() {
+    add_shortcode( 'wpbb_career_advice', static function( $atts ) { return wpbb_jobs_career_advice_cards( shortcode_atts( array( 'limit' => 3 ), $atts ) ); } );
+}, 23 );
+
+add_action( 'init', static function() {
+    if ( ! wp_script_is( 'wpbb-jobs-blocks', 'registered' ) ) return;
+    $common = array( 'api_version' => 2, 'editor_script' => 'wpbb-jobs-blocks' );
+    register_block_type( 'wpbb-jobs/career-advice', array_merge( $common, array(
+        'attributes' => array( 'limit' => array( 'type' => 'number', 'default' => 3 ) ),
+        'render_callback' => static function( $attrs ) { return wpbb_jobs_career_advice_cards( array( 'limit' => $attrs['limit'] ?? 3 ) ); },
+    ) ) );
+}, 32 );

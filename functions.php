@@ -1,6 +1,8 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/inc/frontend-password-protection.php';
+require_once __DIR__ . '/inc/jobs-i18n.php';
 require_once __DIR__ . '/inc/bbuilder-system-v62.php';
 require_once __DIR__ . '/inc/jobs-core.php';
 require_once __DIR__ . '/inc/jobs-render.php';
@@ -46,6 +48,13 @@ function wpbb_jobs_enqueue_assets() {
         get_stylesheet_directory_uri() . '/assets/jobs-portal.css',
         array( 'wpbb-jobs-sector-base' ),
         $version
+    );
+    wp_enqueue_script(
+        'wpbb-jobs-salary',
+        get_stylesheet_directory_uri() . '/assets/jobs-salary.js',
+        array(),
+        $version,
+        true
     );
 }
 add_action( 'wp_enqueue_scripts', 'wpbb_jobs_enqueue_assets', 160 );
@@ -271,7 +280,8 @@ function wpbb_jobs_navigation_items( $items, $profile ) {
 
     $jobs = array( 'key' => 'jobs', 'title' => __( 'Jobs', 'wp-bbtheme-child' ), 'slug' => 'jobs', 'locations' => array( 'header', 'footer' ) );
     $companies = array( 'key' => 'companies', 'title' => __( 'Companies', 'wp-bbtheme-child' ), 'slug' => 'hiring-companies', 'locations' => array( 'header', 'footer' ) );
-    array_splice( $items, 1, 0, array( $jobs, $companies ) );
+    $salary = array( 'key' => 'salary-guide', 'title' => __( 'Salary Guide', 'wp-bbtheme-child' ), 'slug' => 'salary-guide', 'locations' => array( 'header', 'footer' ) );
+    array_splice( $items, 1, 0, array( $jobs, $companies, $salary ) );
     return $items;
 }
 add_filter( 'wp_theme_demo_navigation_items', 'wpbb_jobs_navigation_items', 20, 2 );
@@ -304,6 +314,7 @@ function wpbb_jobs_mega_menu_definitions( $definitions, $profile ) {
             'links' => array(
                 array( __( 'Hiring companies', 'wp-bbtheme-child' ), __( 'Explore employers with active recruitment profiles.', 'wp-bbtheme-child' ), wpbb_jobs_page_url( 'hiring-companies' ) ),
                 array( __( 'Career advice', 'wp-bbtheme-child' ), __( 'Practical guidance for applications and interviews.', 'wp-bbtheme-child' ), get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog/' ) ),
+                array( __( 'Salary guide', 'wp-bbtheme-child' ), __( 'Compare live demo salary benchmarks and estimate take-home pay.', 'wp-bbtheme-child' ), wpbb_jobs_page_url( 'salary-guide' ) ),
                 array( __( 'Contact', 'wp-bbtheme-child' ), __( 'Get help with the recruitment platform.', 'wp-bbtheme-child' ), wpbb_jobs_page_url( 'contact' ) ),
             ),
         ),

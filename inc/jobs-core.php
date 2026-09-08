@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const WPBB_JOBS_VERSION = '3.8.10.71';
+const WPBB_JOBS_VERSION = '3.8.10.80';
 
 function wpbb_jobs_settings() {
     $defaults = array(
@@ -290,7 +290,21 @@ function wpbb_jobs_engine_active() {
 
 function wpbb_jobs_page_url( $slug ) {
     $page = get_page_by_path( sanitize_title( $slug ), OBJECT, 'page' );
-    if ( $page instanceof WP_Post ) return get_permalink( $page );
+    if ( $page instanceof WP_Post ) {
+        $target_id = (int) $page->ID;
+        // Persist canonical English URLs while demo content is generated in
+        // wp-admin. Managed Polylang copies are localized after the canonical
+        // source has been saved. On the public site, route dynamic links to the
+        // current language normally.
+        if ( ! is_admin() && function_exists( 'pll_get_post' ) && function_exists( 'wpbb_jobs_current_language' ) ) {
+            $lang = wpbb_jobs_current_language();
+            if ( $lang && 'en' !== $lang ) {
+                $translated = absint( pll_get_post( $target_id, $lang ) );
+                if ( $translated ) $target_id = $translated;
+            }
+        }
+        return get_permalink( $target_id );
+    }
     if ( function_exists( 'wp_theme_demo_page_url' ) ) {
         $url = wp_theme_demo_page_url( $slug );
         if ( $url ) return $url;

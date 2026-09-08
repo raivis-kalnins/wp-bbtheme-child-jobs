@@ -36,3 +36,20 @@
   register('wpbb-jobs/companies', __('HR Hiring Companies', 'wp-bbtheme-child'), 'building', { perPage:{type:'number',default:6}, columns:{type:'number',default:3} }, {perPage:true,columns:true,maxColumns:4});
   register('wpbb-jobs/resumes', __('HR Candidate Profiles', 'wp-bbtheme-child'), 'id', { perPage:{type:'number',default:6}, columns:{type:'number',default:2} }, {perPage:true,columns:true,maxColumns:3});
 })(window.wp);
+(function(wp){
+  if (!wp || !wp.blocks || !wp.element || !wp.serverSideRender) return;
+  var el=wp.element.createElement, __=wp.i18n.__, SSR=wp.serverSideRender;
+  function simple(name,title,icon,attributes){
+    if (wp.blocks.getBlockType(name)) return;
+    wp.blocks.registerBlockType(name,{apiVersion:2,title:title,icon:icon,category:'widgets',attributes:attributes||{},supports:{html:false},edit:function(props){return el(SSR,{block:name,attributes:props.attributes});},save:function(){return null;}});
+  }
+  simple('wpbb-jobs/categories', __('HR Job Categories','wp-bbtheme-child'),'category',{limit:{type:'number',default:8}});
+  simple('wpbb-jobs/home-metrics', __('HR Jobs Marketplace Stats','wp-bbtheme-child'),'chart-bar',{});
+  simple('wpbb-jobs/salary-guide', __('HR Salary Guide','wp-bbtheme-child'),'chart-line',{limit:{type:'number',default:6}});
+  simple('wpbb-jobs/salary-calculator', __('HR Salary Calculator','wp-bbtheme-child'),'calculator',{});
+})(window.wp);
+(function(wp){
+  if (!wp || !wp.blocks || !wp.element || !wp.serverSideRender || wp.blocks.getBlockType('wpbb-jobs/career-advice')) return;
+  var el=wp.element.createElement, __=wp.i18n.__, SSR=wp.serverSideRender;
+  wp.blocks.registerBlockType('wpbb-jobs/career-advice',{apiVersion:2,title:__('HR Career Advice','wp-bbtheme-child'),icon:'welcome-learn-more',category:'widgets',attributes:{limit:{type:'number',default:3}},supports:{html:false},edit:function(props){return el(SSR,{block:'wpbb-jobs/career-advice',attributes:props.attributes});},save:function(){return null;}});
+})(window.wp);

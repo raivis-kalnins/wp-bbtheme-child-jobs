@@ -1,11 +1,40 @@
-## 3.8.10.74
-
-- Suite-wide spacing, directory-card and header-action alignment cleanup.
-- Sector media repair reruns against the current bundled assets.
-- WooCommerce catalogue, product, cart, checkout and account presentation now follows the active sector palette.
-- Managed demo products from other sectors are removed without touching unmarked real products.
-
 # Changelog
+
+## 3.8.10.80
+
+- Rebuilds every Starter Setup-managed Jobs homepage translation from the same search-led BBuilder structure as English.
+- Adds complete demo-facing translation coverage for the homepage, job categories/types, sample vacancy titles and descriptions, employer cards, salary planner/calculator, candidate/employer routes, career advice, navigation and footer labels across DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS.
+- Localises sample Jobs CPT titles/excerpts at render time without duplicating or rewriting user-created recruitment data.
+- Fixes translated homepage image URLs by serialising each managed language page in its target language instead of copying stale absolute demo markup.
+- Standardises hero, metrics, categories, employers, salary tools, vacancies, candidate/employer routes and career-advice grids so long translated strings keep the same alignment and responsive rhythm as English.
+- Fixes oversized/empty salary-calculator space and normalises route/advice image aspect ratios in translated pages.
+- Finalises the frontend-password settings fix for ACF Theme Settings: checkbox/password inputs are now created after ACF renders the General tab, so Enable/Disable and Change Password are usable and save through AJAX without modifying the parent theme.
+
+## 3.8.10.79
+
+- Fixes Frontend Password Protection controls inside Settings → Theme Settings → General.
+- Removes the invalid nested admin form; Enable/Disable and Change Password now save via the main Theme Settings form or the dedicated Save protection settings button.
+- Keeps protection state/password suite-wide when switching maintained child themes.
+- Parent theme is unchanged.
+
+## 3.8.10.78
+
+- Added the finished search-led Jobs homepage presentation layer for the hero, category discovery, employers, salary planner, latest jobs, candidate/employer routes and career-advice cards.
+- Re-synchronises every Starter Setup-managed Polylang demo page to the same 3.8.10.78 homepage structure instead of updating English only.
+- Added Jobs-sector starter translations for German, Spanish, French, Polish, Russian, Latvian, Lithuanian, Estonian, Danish, Swedish, Norwegian Bokmal, Finnish and Icelandic.
+- Localises managed internal Jobs links after translation so language variants stay inside their own locale.
+- Keeps canonical English URLs while demo content is generated in wp-admin, preventing admin language state from leaking translated links into the English source page.
+- Added matching Gutenberg editor preview styles for the new homepage discovery and salary blocks.
+
+## 3.8.10.76
+
+- Rebuilt the Jobs homepage around job search as the primary action.
+- Added job-category discovery, current-opportunity metrics and richer employer discovery.
+- Added a Salary Guide page with live demo-vacancy salary benchmarks.
+- Added an integrated illustrative UK take-home pay calculator for the 2026/27 tax year.
+- Added salary/category/career-advice Gutenberg blocks and matching shortcodes.
+- Added Salary Guide to the Jobs navigation and recruitment mega menu.
+- Bumped the managed-demo repair marker so existing managed Jobs homepages refresh once after upgrade.
 
 ## 3.8.10.73
 

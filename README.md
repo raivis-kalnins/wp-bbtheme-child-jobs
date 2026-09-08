@@ -1,4 +1,14 @@
-# WP BBTheme Child Jobs 3.8.10.73
+# WP BBTheme Child Jobs 3.8.10.80
+
+## 3.8.10.80 multilingual parity + layout release
+
+This release keeps the integrated recruitment engine self-contained and makes the managed Jobs demo visually and structurally consistent in **English plus 13 translated languages**. Starter Setup-managed translated pages are rebuilt from the same search-led homepage serializer, so they keep the same images, BBuilder structure, section widths, responsive grids and salary tools as English.
+
+Supported demo languages: **EN, DE, ES, FR, PL, RU, LV, LT, ET, DA, SV, NB, FI and IS**. Demo-facing headings, navigation, categories, job types, sample vacancies/descriptions, employer summaries, salary planner/calculator labels, candidate/employer routes, career advice and footer labels are localised. User-created content is not overwritten.
+
+The Jobs homepage is now search-led rather than brochure-led: vacancy search appears in the hero, followed by category discovery, active employers, salary benchmarks/calculator, current jobs, candidate/employer routes and career advice. The salary figures shown in the demo salary guide are calculated from published demo vacancies on the site; the take-home calculator is an illustrative PAYE estimate and is not financial or tax advice.
+
+Starter Setup-managed Polylang versions now use the **same homepage structure and presentation** as English. The theme ships starter UI/content translations for `de`, `es`, `fr`, `pl`, `ru`, `lv`, `lt`, `et`, `da`, `sv`, `nb`, `fi` and `is`, and localises the managed internal links for each language. Existing editor-created translations that are not owned by Starter Setup remain protected.
 
 A self-contained **HR / Jobs / recruitment** child theme for the WP BBTheme suite. The recruitment engine is integrated directly into the child theme, so **WP Job Portal is not required**.
 
@@ -6,7 +16,7 @@ A self-contained **HR / Jobs / recruitment** child theme for the WP BBTheme suit
 
 1. Install and activate the **WP BBTheme** parent theme.
 2. Install and activate **WP BBuilder 5.6.8 or newer**.
-3. Install and activate **WP BBTheme Child Jobs 3.8.10.73**.
+3. Install and activate **WP BBTheme Child Jobs 3.8.10.80**.
 4. Open **HR Jobs → Setup & Demo** (or **Appearance → HR Jobs Setup**).
 5. Run the parent **Starter Setup / Import active child-theme demo**. The Jobs theme now automatically seeds the recruitment marketplace as part of the same import.
 6. Use **HR Jobs → Setup & Demo → Add / repair HR demo data** only when you want to repair/reseed the integrated recruitment records without rebuilding the whole site demo.
@@ -38,6 +48,10 @@ The Jobs theme includes dynamic Gutenberg blocks that can be placed inside norma
 - **HR Jobs Listings** (`wpbb-jobs/list`)
 - **HR Hiring Companies** (`wpbb-jobs/companies`)
 - **HR Candidate Profiles** (`wpbb-jobs/resumes`)
+- **HR Job Categories** (`wpbb-jobs/categories`)
+- **HR Salary Guide** (`wpbb-jobs/salary-guide`)
+- **HR Salary Calculator** (`wpbb-jobs/salary-calculator`)
+- **HR Career Advice** (`wpbb-jobs/career-advice`)
 
 The supplied HR patterns use the same corrected sector layout structure as the other 3.8.10.67+ child themes:
 
@@ -57,6 +71,7 @@ The setup screen can safely create or refresh these pages:
 - `/post-a-job/`
 - `/create-resume/`
 - `/login-register/`
+- `/salary-guide/` — salary benchmarks and take-home pay calculator
 
 Only pages carrying the Jobs theme ownership marker are refreshed. An existing same-slug page created independently is left untouched.
 
@@ -73,6 +88,11 @@ The integrated engine also exposes shortcodes for practical page composition:
 - `[wpbb_post_job]`
 - `[wpbb_resume_form]`
 - `[wpbb_jobs_login_register]`
+- `[wpbb_job_categories]`
+- `[wpbb_jobs_home_metrics]`
+- `[wpbb_salary_guide]`
+- `[wpbb_salary_calculator]`
+- `[wpbb_jobs_career_advice]`
 
 ## Admin structure
 
@@ -137,3 +157,10 @@ This release implements the core careers / ATS / job-marketplace workflow direct
 ## 3.8.10.70 update
 
 - Refreshes the theme screenshot so the HR / Jobs preview matches the shared WP Base sector-card style used by the other child themes in **Appearance → Themes**.
+## Frontend password protection
+
+The Jobs child theme uses the same suite-wide frontend preview protection as the other maintained WP Base child themes. Configure it under **Settings → Theme Settings → General**. Protection can be enabled or disabled, and the initial demo password is `wp@demo`. The password hash and enabled state are shared across maintained child themes.
+
+
+
+**3.8.10.80 admin fix:** the General-tab checkbox and password input are injected after ACF renders the settings panel, avoiding ACF Message-field sanitisation. The dedicated **Save protection settings** button can now actually disable the gate or change its password. The parent theme is not modified.
