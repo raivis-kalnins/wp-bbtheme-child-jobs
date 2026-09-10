@@ -470,6 +470,12 @@ add_action( 'admin_post_nopriv_wpbb_jobs_register', 'wpbb_jobs_handle_registrati
 function wpbb_jobs_handle_company_save() {
     if ( ! is_user_logged_in() || ! wpbb_jobs_is_employer() ) wp_die( esc_html__( 'Employer access required.', 'wp-bbtheme-child' ) );
     check_admin_referer( 'wpbb_jobs_company_save', 'wpbb_jobs_nonce' );
+    if ( function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
+        $captcha = wpbb_jobs_v86_verify_public_hcaptcha();
+        if ( is_wp_error( $captcha ) ) {
+            wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'employer-dashboard' ), 'error', $captcha->get_error_message() );
+        }
+    }
 
     $company_id = absint( $_POST['company_id'] ?? 0 );
     if ( $company_id && ! wpbb_jobs_can_edit_owned_post( $company_id, 'wpbb_company' ) ) wp_die( esc_html__( 'You cannot edit this company.', 'wp-bbtheme-child' ) );
@@ -503,6 +509,15 @@ add_action( 'admin_post_wpbb_jobs_company_save', 'wpbb_jobs_handle_company_save'
 function wpbb_jobs_handle_job_save() {
     if ( ! is_user_logged_in() || ! wpbb_jobs_is_employer() ) wp_die( esc_html__( 'Employer access required.', 'wp-bbtheme-child' ) );
     check_admin_referer( 'wpbb_jobs_job_save', 'wpbb_jobs_nonce' );
+    if ( empty( $_POST['job_terms_consent'] ) ) {
+        wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'post-a-job' ), 'error', __( 'Please confirm the vacancy terms before submitting.', 'wp-bbtheme-child' ) );
+    }
+    if ( function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
+        $captcha = wpbb_jobs_v86_verify_public_hcaptcha();
+        if ( is_wp_error( $captcha ) ) {
+            wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'post-a-job' ), 'error', $captcha->get_error_message() );
+        }
+    }
 
     $job_id = absint( $_POST['job_id'] ?? 0 );
     if ( $job_id && ! wpbb_jobs_can_edit_owned_post( $job_id, 'wpbb_job' ) ) wp_die( esc_html__( 'You cannot edit this job.', 'wp-bbtheme-child' ) );
@@ -555,6 +570,12 @@ add_action( 'admin_post_wpbb_jobs_job_save', 'wpbb_jobs_handle_job_save' );
 function wpbb_jobs_handle_resume_save() {
     if ( ! is_user_logged_in() || ! wpbb_jobs_is_candidate() ) wp_die( esc_html__( 'Candidate access required.', 'wp-bbtheme-child' ) );
     check_admin_referer( 'wpbb_jobs_resume_save', 'wpbb_jobs_nonce' );
+    if ( function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
+        $captcha = wpbb_jobs_v86_verify_public_hcaptcha();
+        if ( is_wp_error( $captcha ) ) {
+            wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'create-resume' ), 'error', $captcha->get_error_message() );
+        }
+    }
 
     $resume = wpbb_jobs_get_user_resume();
     $resume_id = $resume instanceof WP_Post ? $resume->ID : 0;
@@ -647,9 +668,12 @@ function wpbb_jobs_handle_application() {
     if ( ! $job_id || 'wpbb_job' !== get_post_type( $job_id ) || ! wpbb_jobs_job_is_open( $job_id ) ) {
         wpbb_jobs_redirect_with_notice( $return, 'error', __( 'This job is not accepting applications.', 'wp-bbtheme-child' ) );
     }
+    if ( empty( $_POST['application_terms_consent'] ) || '1' !== sanitize_text_field( wp_unslash( $_POST['application_terms_consent'] ) ) ) {
+        wpbb_jobs_redirect_with_notice( $return, 'error', __( 'Please accept the application privacy and terms consent.', 'wp-bbtheme-child' ) );
+    }
 
     $user_id = get_current_user_id();
-    if ( ! $user_id && function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
+    if ( function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
         $captcha = wpbb_jobs_v86_verify_public_hcaptcha();
         if ( is_wp_error( $captcha ) ) {
             wpbb_jobs_redirect_with_notice( $return, 'error', $captcha->get_error_message() );

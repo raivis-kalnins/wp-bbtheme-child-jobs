@@ -1,3 +1,19 @@
+# WP BBTheme Child Jobs 3.8.10.96
+
+Full-grid Jobs/search and form-security finish. The managed Jobs page now uses a wide four-column desktop vacancy grid and refreshes managed multilingual copies once after upgrade. Jobs submission forms use the hCaptcha configuration stored in WP BBuilder; the Contact page continues to use WP BBuilder's native Dynamic Form hCaptcha, with a small compatibility renderer for shared/explicit hCaptcha script loading. See `UPGRADE-NOTES-3.8.10.96.md`.
+
+# WP BBTheme Child Jobs 3.8.10.94
+
+Emergency boot hotfix for 3.8.10.93. This package corrects the mismatched v93 include filename and loads the release module defensively, restoring WordPress immediately after replacing the broken theme files. All 3.8.10.93 Jobs/search/Home 2 functionality is preserved. See `UPGRADE-NOTES-3.8.10.94.md`.
+
+# WP BBTheme Child Jobs 3.8.10.93
+
+Live homepage/search correction for the Jobs marketplace. 3.8.10.93 adds AJAX-first homepage vacancy search, AJAX popular-filter chips, a repaired full-background hero/metric strip, stronger category cards, a sharper candidate journey image, a narrower newsletter field and an expanded repeated-role Home 2 demo with additional sample vacancies. Existing unmanaged content is not overwritten. See `UPGRADE-NOTES-3.8.10.93.md`.
+
+# WP BBTheme Child Jobs 3.8.10.89
+
+Marketplace-style recruitment child theme for WP BBTheme. This release expects WP BBuilder 5.6.9+ for the fluid-container hero background image controls. See `UPGRADE-NOTES-3.8.10.89.md`.
+
 # WP BBTheme Child Jobs 3.8.10.88
 
 ## 3.8.10.88 live-layout correction

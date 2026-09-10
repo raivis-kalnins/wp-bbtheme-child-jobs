@@ -27,7 +27,10 @@ function wpbb_jobs_v86_public_hcaptcha_html( $context = 'public-form' ) {
     $config = wpbb_jobs_v86_hcaptcha_config();
     if ( empty( $config['enabled'] ) ) return '';
 
-    return '<div class="wpbb-jobs-public-captcha" data-wpbb-jobs-captcha-shell data-context="' . esc_attr( $context ) . '">'
+    // 3.8.10.99: all public Jobs forms render the BBuilder hCaptcha inline.
+    // This avoids blank modal hosts when another plugin loads the shared explicit API first.
+    $mode = 'inline';
+    return '<div class="wpbb-jobs-public-captcha" data-wpbb-jobs-captcha-shell data-context="' . esc_attr( $context ) . '" data-mode="' . esc_attr( $mode ) . '">'
         . '<div class="wpbb-jobs-public-captcha__host" data-wpbb-jobs-hcaptcha data-sitekey="' . esc_attr( $config['site_key'] ) . '" data-size="normal"></div>'
         . '<input type="hidden" name="wpbb_jobs_hcaptcha_response" value="">'
         . '</div>';
@@ -43,6 +46,10 @@ function wpbb_jobs_v86_verify_public_hcaptcha() {
 
     if ( '' === $token ) {
         return new WP_Error( 'wpbb_jobs_hcaptcha_missing', __( 'Please complete the hCaptcha verification.', 'wp-bbtheme-child' ) );
+    }
+
+    if ( function_exists( 'wpbb_verify_hcaptcha_token' ) ) {
+        return wpbb_verify_hcaptcha_token( $token, ! empty( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
     }
 
     $body = array(

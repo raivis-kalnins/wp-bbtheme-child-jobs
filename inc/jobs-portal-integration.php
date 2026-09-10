@@ -76,23 +76,55 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
     $hero_left .= wpbb_child_v62_heading( __( 'Find a job that fits your life.', 'wp-bbtheme-child' ), 1, 'wpbb-jobs-home-title' );
     $hero_left .= wpbb_child_v62_paragraph( __( 'Search thousands of jobs, discover top employers and take the next step in your career.', 'wp-bbtheme-child' ), 'wpbb-jobs-home-intro' );
     $hero_left .= wpbb_jobs_block( 'search', array( 'compact' => true ) );
-    $popular = array( 'Remote' => 'remote', 'Part time' => 'part-time', 'Full time' => 'full-time', 'Marketing' => 'marketing', 'IT' => 'it', 'Finance' => 'finance' );
+    $type_part = get_term_by( 'name', 'Part time', 'wpbb_job_type' );
+    $type_full = get_term_by( 'name', 'Full time', 'wpbb_job_type' );
+    $cat_marketing = get_term_by( 'name', 'Marketing', 'wpbb_job_category' );
+    $cat_it = get_term_by( 'name', 'Technology', 'wpbb_job_category' );
+    $cat_finance = get_term_by( 'name', 'Finance', 'wpbb_job_category' );
+    $popular = array(
+        'Remote'    => array( 'job_remote' => 1 ),
+        'Part time' => $type_part ? array( 'job_type' => (int) $type_part->term_id ) : array( 'job_keyword' => 'part time' ),
+        'Full time' => $type_full ? array( 'job_type' => (int) $type_full->term_id ) : array( 'job_keyword' => 'full time' ),
+        'Marketing' => $cat_marketing ? array( 'job_category' => (int) $cat_marketing->term_id ) : array( 'job_keyword' => 'marketing' ),
+        'IT'        => $cat_it ? array( 'job_category' => (int) $cat_it->term_id ) : array( 'job_keyword' => 'technology' ),
+        'Finance'   => $cat_finance ? array( 'job_category' => (int) $cat_finance->term_id ) : array( 'job_keyword' => 'finance' ),
+    );
     $chips = '<div class="wpbb-jobs-popular"><span>' . esc_html__( 'Popular searches:', 'wp-bbtheme-child' ) . '</span>';
-    foreach ( $popular as $label => $keyword ) {
+    foreach ( $popular as $label => $query_args ) {
         $chip_label = function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $label ) : $label;
-        $chips .= '<a href="' . esc_url( add_query_arg( 'job_keyword', $keyword, $jobs_url ) ) . '">' . esc_html( $chip_label ) . '</a>';
+        $chips .= '<a data-wpbb-jobs-live-filter="1" href="' . esc_url( add_query_arg( $query_args, $jobs_url ) ) . '">' . esc_html( $chip_label ) . '</a>';
     }
     $chips .= '</div>';
     $hero_left .= wpbb_child_v62_block( 'html', array(), $chips );
 
-    $hero_right  = wpbb_child_v62_image( wpbb_jobs_asset_url( 'jobs-hero-reference.jpg' ), 'wpbb-jobs-home-hero-image' );
-    $hero_right .= wpbb_child_v62_block( 'html', array(), '<div class="wpbb-jobs-home-hero-note">' . esc_html__( 'A brighter career starts here', 'wp-bbtheme-child' ) . '<span aria-hidden="true">↙</span></div>' );
+    $hero_right = wpbb_child_v62_block( 'html', array(), '<div class="wpbb-jobs-home-hero-note">' . esc_html__( 'A brighter career starts here', 'wp-bbtheme-child' ) . '<span aria-hidden="true">↙</span></div>' );
 
     $hero_row = wpbb_child_v62_block( 'wpbb/row', array( 'customClasses' => 'wpbb-jobs-home-hero-row align-items-center', 'gutterX' => 'gx-5', 'gutterY' => 'gy-4' ),
-        wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 7 ), $hero_left ) .
-        wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 5 ), $hero_right )
+        wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 6 ), $hero_left ) .
+        wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 6, 'customClasses' => 'wpbb-jobs-home-hero-visual' ), $hero_right )
     );
-    $hero = wpbb_child_v67_section( 'wpbb-jobs-home-hero', $hero_row . wpbb_jobs_block( 'home-metrics' ), 'wpbb-jobs-home-hero-shell' );
+    $hero_inner = wpbb_child_v62_block(
+        'wpbb/bootstrap-div',
+        array( 'containerClass' => 'container', 'utilityClasses' => 'wpbb-v67-section-inner' ),
+        $hero_row . wpbb_jobs_block( 'home-metrics' )
+    );
+    $hero = wpbb_child_v62_block(
+        'wpbb/bootstrap-div',
+        array(
+            'containerClass'       => 'container-fluid',
+            'utilityClasses'       => 'wpbb-v67-section-shell px-0 wpbb-jobs-home-hero',
+            'className'            => 'wpbb-jobs-home-hero-shell',
+            'backgroundColor'      => '#eef9f7',
+            'backgroundGradient'   => 'linear-gradient(90deg,rgba(255,249,242,.98) 0%,rgba(249,253,252,.96) 43%,rgba(240,250,248,.34) 58%,rgba(240,250,248,0) 72%)',
+            'backgroundImageUrl'   => wpbb_jobs_asset_url( 'jobs-hero-reference.jpg' ),
+            'backgroundImage'      => wpbb_jobs_asset_url( 'jobs-hero-reference.jpg' ),
+            'backgroundSize'       => '100% 100%,58% auto',
+            'backgroundPosition'   => 'center center,right center',
+            'backgroundRepeat'     => 'no-repeat',
+            'backgroundAttachment' => 'scroll',
+        ),
+        $hero_inner
+    );
 
     $categories  = wpbb_child_v62_paragraph( __( 'Explore opportunities', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
     $categories .= wpbb_child_v62_heading( __( 'Browse jobs by career area.', 'wp-bbtheme-child' ), 2 );
@@ -125,7 +157,7 @@ function wpbb_jobs_home_content_v76( $profile = array() ) {
     $latest .= wpbb_child_v62_paragraph( '<a class="wpbb-jobs-text-link" href="' . esc_url( $jobs_url ) . '">' . esc_html__( 'See every open vacancy', 'wp-bbtheme-child' ) . ' →</a>' );
     $latest = wpbb_child_v67_section( 'wpbb-jobs-home-latest bg-light', $latest );
 
-    $candidate  = wpbb_child_v62_image( wpbb_jobs_asset_url( 'candidate-interview.jpg' ), 'wpbb-jobs-route-card__image' );
+    $candidate  = wpbb_child_v62_image( wpbb_jobs_asset_url( 'candidate-opportunity.jpg' ), 'wpbb-jobs-route-card__image' );
     $candidate .= wpbb_child_v62_paragraph( __( 'For candidates', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
     $candidate .= wpbb_child_v62_heading( __( 'Be ready when the right role appears.', 'wp-bbtheme-child' ), 3 );
     $candidate .= wpbb_child_v62_paragraph( __( 'Create a reusable candidate profile, attach a CV and keep submitted applications visible in your dashboard.', 'wp-bbtheme-child' ) );
@@ -181,7 +213,7 @@ function wpbb_jobs_portal_page_content( $slug ) {
         'jobs' => array(
             __( 'Jobs', 'wp-bbtheme-child' ),
             __( 'Search current opportunities and narrow the list by the details that matter to you.', 'wp-bbtheme-child' ),
-            wpbb_jobs_block( 'search', array( 'compact' => false ) ) . wpbb_jobs_block( 'list', array( 'perPage' => 12, 'columns' => 2, 'featured' => false ) ),
+            wpbb_jobs_block( 'search', array( 'compact' => false ) ) . wpbb_jobs_block( 'list', array( 'perPage' => 20, 'columns' => 4, 'featured' => false ) ),
         ),
         'hiring-companies' => array(
             __( 'Hiring Companies', 'wp-bbtheme-child' ),
@@ -238,7 +270,7 @@ function wpbb_jobs_portal_page_content( $slug ) {
     $header  = wpbb_child_v62_paragraph( __( 'TalentBridge Jobs', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
     $header .= wpbb_child_v62_heading( $title, 1, 'wpbb-jobs-portal-page-title' );
     $header .= wpbb_child_v62_paragraph( $intro, 'wpbb-jobs-portal-page-intro' );
-    return wpbb_jobs_section( $header, 'wpbb-jobs-portal-page-header bg-light' ) . wpbb_jobs_section( $body, 'wpbb-jobs-portal-page-body' );
+    return wpbb_jobs_section( $header, 'wpbb-jobs-portal-page-header bg-light' ) . wpbb_jobs_section( $body, 'wpbb-jobs-portal-page-body' . ( 'jobs' === $slug ? ' wpbb-jobs-page-jobs-body' : '' ) );
 }
 
 function wpbb_jobs_create_portal_pages( $profile = null ) {
@@ -276,7 +308,7 @@ function wpbb_jobs_create_portal_pages( $profile = null ) {
         update_post_meta( $id, '_wpbb_jobs_portal_page', 1 );
         update_post_meta( $id, '_wp_theme_demo_profile', 'jobs' );
         update_post_meta( $id, '_wp_theme_demo_managed', '1' );
-        update_post_meta( $id, '_wpbb_child_bbuilder_version', '3.8.10.87' );
+        update_post_meta( $id, '_wpbb_child_bbuilder_version', '3.8.10.89' );
         $managed_ids[] = (int) $id;
         $existing instanceof WP_Post ? $result['updated']++ : $result['created']++;
     }

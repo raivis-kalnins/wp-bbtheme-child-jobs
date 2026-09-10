@@ -518,7 +518,7 @@ function wpbb_jobs_high_volume_home() {
             </div>
             <div id="wpbb-hv-filter" class="wpbb-jobs-hv-filter">
                 <p class="wpbb-jobs-hv-filter__label"><?php esc_html_e( 'Find the right role', 'wp-bbtheme-child' ); ?></p>
-                <form<?php echo ! is_user_logged_in() ? ' data-wpbb-jobs-public-form="1"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <form data-wpbb-jobs-public-form="1" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                     <input type="hidden" name="action" value="wpbb_jobs_high_volume_qualify" />
                     <input type="hidden" name="variant" value="<?php echo esc_attr( $variant ); ?>" />
                     <?php wp_nonce_field( 'wpbb_jobs_high_volume_qualify', 'wpbb_jobs_nonce' ); ?>
@@ -527,9 +527,17 @@ function wpbb_jobs_high_volume_home() {
                         <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="job_location"><option value=""><?php esc_html_e( 'Any location', 'wp-bbtheme-child' ); ?></option><?php foreach ( $locations as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>"><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
                         <label><?php esc_html_e( 'Job type', 'wp-bbtheme-child' ); ?><select name="job_type"><option value=""><?php esc_html_e( 'Any type', 'wp-bbtheme-child' ); ?></option><?php foreach ( $types as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>"><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
                     </div>
-                    <?php if ( ! is_user_logged_in() && function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'high-volume-qualifier' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'high-volume-qualifier' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Start matching', 'wp-bbtheme-child' ); ?> →</button>
                 </form>
+            </div>
+        </section>
+        <section class="wpbb-jobs-hv-role-types">
+            <div class="wpbb-jobs-hv-section-head"><p class="wp-theme-sector-eyebrow"><?php esc_html_e( 'Repeat-role recruitment', 'wp-bbtheme-child' ); ?></p><h2><?php esc_html_e( 'Built for roles you hire again and again.', 'wp-bbtheme-child' ); ?></h2><p><?php esc_html_e( 'Create one clear recruitment route, then reuse it for every intake, location or shift.', 'wp-bbtheme-child' ); ?></p></div>
+            <div class="wpbb-jobs-hv-role-grid">
+                <?php foreach ( array( 'Firefighter', 'Warehouse Operative', 'Care Assistant', 'Delivery Driver', 'Customer Service Advisor', 'Retail Assistant' ) as $role_label ) : ?>
+                    <a href="<?php echo esc_url( add_query_arg( 'job_keyword', $role_label, $jobs_url ) ); ?>"><span aria-hidden="true">→</span><strong><?php echo esc_html( $role_label ); ?></strong><small><?php esc_html_e( 'Reusable hiring journey', 'wp-bbtheme-child' ); ?></small></a>
+                <?php endforeach; ?>
             </div>
         </section>
         <section class="wpbb-jobs-hv-benefits">
@@ -551,7 +559,7 @@ add_shortcode( 'wpbb_jobs_high_volume_home', 'wpbb_jobs_high_volume_home' );
 
 function wpbb_jobs_handle_high_volume_qualify() {
     check_admin_referer( 'wpbb_jobs_high_volume_qualify', 'wpbb_jobs_nonce' );
-    if ( ! is_user_logged_in() && function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
+    if ( function_exists( 'wpbb_jobs_v86_verify_public_hcaptcha' ) ) {
         $captcha = wpbb_jobs_v86_verify_public_hcaptcha();
         if ( is_wp_error( $captcha ) ) {
             wpbb_jobs_redirect_with_notice( wpbb_jobs_page_url( 'home-2' ), 'error', $captcha->get_error_message() );

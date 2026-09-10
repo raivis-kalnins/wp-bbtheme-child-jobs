@@ -28,6 +28,20 @@
     return form ? form.querySelector('[name="wpbb_jobs_hcaptcha_response"]') : null;
   }
 
+  function captchaMode(form) {
+    var shell = form ? form.querySelector('[data-wpbb-jobs-captcha-shell]') : null;
+    return shell && shell.getAttribute('data-mode') === 'inline' ? 'inline' : 'modal';
+  }
+
+  function inlineStatus(form, text) {
+    if (!form) return;
+    var shell = form.querySelector('[data-wpbb-jobs-captcha-shell]');
+    if (!shell) return;
+    var node = shell.querySelector('.wpbb-jobs-inline-captcha-status');
+    if (!node) { node = document.createElement('div'); node.className = 'wpbb-jobs-inline-captcha-status'; node.setAttribute('role','status'); node.setAttribute('aria-live','polite'); shell.appendChild(node); }
+    node.textContent = text || '';
+  }
+
   function widgetId(form) {
     var value = form && form.dataset.wpbbJobsCaptchaWidget;
     return value === undefined || value === '' ? null : value;
@@ -43,6 +57,7 @@
   }
 
   function modalFor(form) {
+    if (captchaMode(form) === 'inline') return null;
     if (form.wpbbJobsCaptchaModal && document.body.contains(form.wpbbJobsCaptchaModal)) {
       return form.wpbbJobsCaptchaModal;
     }
@@ -66,6 +81,7 @@
     modal.querySelector('.wpbb-jobs-captcha-modal__widget').appendChild(host);
     document.body.appendChild(modal);
     form.wpbbJobsCaptchaModal = modal;
+    modal.wpbbJobsForm = form;
 
     modal.querySelector('.wpbb-jobs-captcha-modal__close').addEventListener('click', function () {
       closeModal(form, true);
@@ -149,17 +165,25 @@
         callback: function (token) {
           setToken(form, token || '');
           status(form, '');
-          closeModal(form, false);
+          inlineStatus(form, '');
+          if (captchaMode(form) !== 'inline') closeModal(form, false);
           form.dataset.wpbbJobsCaptchaVerified = '1';
-          window.HTMLFormElement.prototype.submit.call(form);
+          if (typeof form.requestSubmit === 'function') {
+            form.dataset.wpbbJobsCaptchaBypass = '1';
+            form.requestSubmit();
+          } else {
+            window.HTMLFormElement.prototype.submit.call(form);
+          }
         },
         'error-callback': function () {
           setToken(form, '');
           status(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
+          inlineStatus(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
         },
         'expired-callback': function () {
           reset(form);
           status(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
+          inlineStatus(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
         }
       });
       form.dataset.wpbbJobsCaptchaWidget = String(id);
@@ -188,16 +212,25 @@
   function onSubmit(event) {
     var form = event.target;
     if (!cfg.captcha || !form || !form.matches('form[data-wpbb-jobs-public-form="1"]')) return;
+    if (form.dataset.wpbbJobsCaptchaBypass === '1') { delete form.dataset.wpbbJobsCaptchaBypass; return; }
     if (form.dataset.wpbbJobsCaptchaVerified === '1' || (tokenInput(form) && tokenInput(form).value)) return;
     event.preventDefault();
     event.stopPropagation();
+    if (captchaMode(form) === 'inline') {
+      render(form);
+      inlineStatus(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
+      var host = formHost(form);
+      if (host && typeof host.scrollIntoView === 'function') host.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
     waitForCaptcha(form, 0);
   }
 
   function init() {
     replaceBranding();
     document.querySelectorAll('form[data-wpbb-jobs-public-form="1"]').forEach(function (form) {
-      modalFor(form);
+      if (captchaMode(form) === 'inline') render(form);
+      else modalFor(form);
     });
   }
 

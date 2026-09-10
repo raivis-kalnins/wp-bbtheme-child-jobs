@@ -1,0 +1,150 @@
+/* Jobs 3.8.10.89 — final marketplace alignment. */
+body.wpbb-jobs-theme{
+  --jobs-shell:1560px;
+  --jobs-green:#078f6a;
+  --jobs-green-bright:#0caf80;
+  --jobs-green-dark:#056d55;
+  --jobs-navy:#10254c;
+  --jobs-copy:#344c63;
+  --jobs-muted:#708398;
+  --jobs-line:#dce8e5;
+  --jobs-mint:#eef9f5;
+  --jobs-sky:#eff8ff;
+  --wpbb-label-color:#17324d;
+  --wpbb-input-border:#d9e6e3;
+  --wpbb-button-bg:#078f6a;
+  --wpbb-button-text:#fff;
+}
+
+/* Use more of the desktop viewport like the supplied marketplace reference. */
+body.wpbb-jobs-theme :is(.wp-theme-utility-bar,.wp-theme-header-main,.wp-theme-header-search-panel,.wp-theme-site-footer)>.container,
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-v67-section-inner.container,
+body.wpbb-jobs-theme .wp-theme-footer-newsletter-band>.container{
+  width:min(var(--jobs-shell),calc(100% - 72px))!important;
+  max-width:var(--jobs-shell)!important;
+}
+@media(max-width:991.98px){
+  body.wpbb-jobs-theme :is(.wp-theme-utility-bar,.wp-theme-header-main,.wp-theme-header-search-panel,.wp-theme-site-footer)>.container,
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-v67-section-inner.container,
+  body.wpbb-jobs-theme .wp-theme-footer-newsletter-band>.container{width:calc(100% - 32px)!important}
+}
+
+/* The hero image is now a wpbb/bootstrap-div fluid-container background. CSS
+ * below is only a visual fallback for sites that have not yet upgraded BBuilder. */
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-shell{
+  position:relative;isolation:isolate;overflow:hidden;
+  background-color:#eef9f7;
+  background-image:
+    linear-gradient(90deg,rgba(255,249,242,.98) 0%,rgba(249,253,252,.96) 43%,rgba(240,250,248,.34) 58%,rgba(240,250,248,0) 72%),
+    url("img/demo/jobs-hero-reference.jpg");
+  background-size:100% 100%,58% auto;
+  background-position:center center,right center;
+  background-repeat:no-repeat;
+  min-height:575px;
+  padding:62px 0 38px!important;
+}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-shell:before{
+  content:"";position:absolute;z-index:-1;left:-9vw;bottom:-120px;width:54vw;height:210px;border-radius:50%;
+  background:rgba(173,234,220,.34);transform:rotate(8deg);pointer-events:none;
+}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-row{
+  min-height:410px!important;display:grid!important;grid-template-columns:minmax(0,52%) minmax(0,48%)!important;gap:0!important;margin:0!important;
+}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-row>.wp-block-wpbb-column{
+  width:auto!important;max-width:none!important;
+}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-row>.wp-block-wpbb-column:first-child{position:relative;z-index:2;padding:8px 42px 30px 0!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-visual{position:relative;min-height:390px;padding:0!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-image{display:none!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-note{
+  position:absolute!important;right:6%;top:18%;z-index:3;max-width:175px;color:#fff!important;font-size:22px!important;line-height:1.2!important;
+  font-family:"Segoe Print","Bradley Hand",cursive!important;text-align:center!important;text-shadow:0 2px 12px rgba(16,37,76,.38);transform:rotate(-4deg);
+}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-note span{display:block;font-size:40px;line-height:1;margin-top:8px;transform:rotate(16deg)}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-title{font-size:clamp(58px,4.25vw,82px)!important;max-width:10ch!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-intro{max-width:620px!important;font-size:19px!important;line-height:1.45!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero .wpbb-jobs-search.is-compact{max-width:900px!important;background:rgba(255,255,255,.97)!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-metrics{max-width:none!important;margin-top:20px!important}
+
+/* Stronger section rhythm and reference-sized cards. */
+body.wpbb-jobs-marketplace-home #wp-theme-main :is(.wpbb-jobs-home-categories,.wpbb-jobs-home-latest,.wpbb-jobs-home-routes,.wpbb-jobs-home-advice){padding:58px 0!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-salary{padding:62px 0!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main :is(.wpbb-jobs-home-categories,.wpbb-jobs-home-latest,.wpbb-jobs-home-routes,.wpbb-jobs-home-advice) h2{font-size:clamp(30px,2.3vw,42px)!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-category-card{min-height:92px!important;padding:16px 17px!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-latest .wpbb-jobs-card{min-height:240px!important;padding:19px!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-latest .wpbb-jobs-card__excerpt{display:none!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-latest .wpbb-jobs-card__title{font-size:18px!important;line-height:1.25!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-route-card{padding:0 0 24px!important;overflow:hidden}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-route-card>*:not(figure){margin-inline:24px!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-route-card__image{margin:0 0 22px!important;border-radius:0!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-route-card__image img{border-radius:0!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-advice-card__body{padding:18px 20px 20px!important}
+
+/* Footer newsletter: headings/copy need white contrast on the teal band. */
+body.wpbb-jobs-theme .wp-theme-footer-newsletter-band{background:linear-gradient(110deg,#086f68 0%,#078c72 52%,#0caf80 100%)!important}
+body.wpbb-jobs-theme .wp-theme-footer-newsletter__copy :is(h2,h3,h4,p),
+body.wpbb-jobs-theme .wp-theme-footer-newsletter__copy{color:#fff!important}
+body.wpbb-jobs-theme .wp-theme-footer-newsletter__copy p{opacity:.88}
+body.wpbb-jobs-theme .wp-theme-footer-newsletter .wp-newslatter-campaigns-consent{color:#fff!important;opacity:.95}
+body.wpbb-jobs-theme .wp-theme-footer-newsletter form.wp-newslatter-campaigns-form input[type=email]{border:1px solid rgba(255,255,255,.42)!important;box-shadow:0 8px 22px rgba(7,58,54,.11)!important}
+body.wpbb-jobs-theme .wp-theme-footer-newsletter form.wp-newslatter-campaigns-form button[type=submit]{background:#08755f!important;color:#fff!important;border-color:#08755f!important}
+
+/* Parent PWA/footer artwork should follow the Jobs brand, not the blue WP icon. */
+body.wpbb-jobs-theme .wp-theme-footer-install a{border-color:#d9e7e3!important;background:#f8fcfb!important;color:#26465a!important}
+body.wpbb-jobs-theme .wp-theme-footer-install a img{border-radius:7px!important}
+
+/* Search/blog filter buttons: keep icon legible on green. */
+body.wpbb-jobs-theme #wp-theme-main :is(.wpbb-blog-filter,.wpbb-content-filters,.wp-theme-blog-filter) button,
+body.wpbb-jobs-theme #wp-theme-main button[type=submit].btn-primary,
+body.wpbb-jobs-theme #wp-theme-main .wpbb-ajax-search button{
+  background:linear-gradient(135deg,#0caf80,#078f6a)!important;border-color:#078f6a!important;color:#fff!important;
+}
+body.wpbb-jobs-theme #wp-theme-main :is(.wpbb-blog-filter,.wpbb-content-filters,.wp-theme-blog-filter) button svg,
+body.wpbb-jobs-theme #wp-theme-main button[type=submit].btn-primary svg{color:#fff!important;stroke:currentColor!important}
+
+/* CV/application upload + captcha modal spacing. */
+body.wpbb-jobs-theme .wpbb-jobs-cv-builder>.wpbb-jobs-public-captcha,
+body.wpbb-jobs-theme .wpbb-jobs-apply>.wpbb-jobs-public-captcha{margin:0!important;height:0!important;min-height:0!important;overflow:visible!important}
+body.wpbb-jobs-theme .wpbb-jobs-cv-builder__actions{margin-top:20px!important;padding-top:20px;border-top:1px solid var(--jobs-line)}
+body.wpbb-jobs-theme .wpbb-jobs-form input[type=file]{padding:9px!important;background:#fff!important;border:1px solid var(--jobs-line)!important;border-radius:11px!important}
+body.wpbb-jobs-theme .wpbb-jobs-form input[type=file]::file-selector-button{margin:-4px 12px -4px -4px;padding:9px 13px;border:0;border-radius:8px;background:#eef8f5;color:#0a7057;font-weight:750;cursor:pointer}
+
+/* Dark mode: preserve the photo while adding a readable deep-teal veil. */
+html:is(.is-dark-theme,[data-theme="dark"]) body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-shell{
+  background-image:linear-gradient(90deg,rgba(6,20,20,.98) 0%,rgba(8,27,26,.94) 43%,rgba(8,30,27,.56) 59%,rgba(8,30,27,.22) 76%),url("img/demo/jobs-hero-reference.jpg")!important;
+  background-color:#081c1b!important;
+}
+html:is(.is-dark-theme,[data-theme="dark"]) body.wpbb-jobs-theme .wp-theme-footer-newsletter__copy :is(h2,h3,h4,p){color:#f2fffc!important}
+html:is(.is-dark-theme,[data-theme="dark"]) body.wpbb-jobs-theme .wp-theme-footer-install a{border-color:#294946!important;background:#0e2422!important;color:#dceae8!important}
+
+@media(max-width:991.98px){
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-shell{
+    min-height:0;padding:36px 0 28px!important;background-image:linear-gradient(180deg,rgba(255,250,244,.98) 0%,rgba(245,253,251,.98) 52%,rgba(239,249,247,.82) 100%),url("img/demo/jobs-hero-reference.jpg");background-size:100% 100%,100% auto;background-position:center center,center bottom;
+  }
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-row{grid-template-columns:1fr!important;min-height:0!important}
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-row>.wp-block-wpbb-column:first-child{padding:0!important}
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-visual{min-height:360px}
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-note{right:8%;top:24%}
+}
+@media(max-width:640px){
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-title{font-size:46px!important}
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-visual{min-height:290px}
+  body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-note{display:none!important}
+}
+
+
+/* Final form/search contrast fixes from the live v88 screenshots. */
+body.wpbb-jobs-theme #wp-theme-main :is(.wp-theme-blog-search__submit,.wp-theme-blog-search>button[type=submit],.wp-theme-blog-search__field>button[type=submit],[data-wpbb-blog-submit]){
+  background:linear-gradient(135deg,#0caf80,#078f6a)!important;
+  border-color:#078f6a!important;color:#fff!important;
+}
+body.wpbb-jobs-theme #wp-theme-main :is(.wp-theme-blog-search__submit,.wp-theme-blog-search>button[type=submit],.wp-theme-blog-search__field>button[type=submit],[data-wpbb-blog-submit]) :is(svg,path,circle,line,polyline){
+  color:#fff!important;stroke:currentColor!important;
+}
+body.wpbb-jobs-theme .wpbb-jobs-contact-form .wpbb-field--captcha{
+  margin-top:4px;padding:16px;border:1px solid var(--jobs-line);border-radius:14px;background:#f8fcfb;
+}
+body.wpbb-jobs-theme .wpbb-jobs-contact-form .h-captcha{min-height:78px}
+html:is(.is-dark-theme,[data-theme="dark"]) body.wpbb-jobs-theme .wpbb-jobs-contact-form .wpbb-field--captcha{
+  border-color:#294946;background:#0e2422;
+}

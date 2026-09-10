@@ -1,0 +1,16 @@
+/* Jobs 3.8.10.90 — final premium screenshot/style alignment. */
+body.wpbb-jobs-theme{--jobs-shell:1560px;--jobs-page:#ffffff;--jobs-card:#ffffff;--jobs-soft:#eef9f5;--jobs-ink:#10254c}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-shell{min-height:610px!important;padding-top:68px!important;background-size:100% 100%,60% auto!important;background-position:center,right center!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-row{min-height:445px!important;grid-template-columns:minmax(0,53%) minmax(0,47%)!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-title{font-size:clamp(62px,4.6vw,86px)!important;line-height:.97!important;letter-spacing:-.055em!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-intro{font-size:20px!important;max-width:640px!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-search.is-compact{border-radius:16px!important;box-shadow:0 16px 44px rgba(16,37,76,.14)!important;border:1px solid rgba(220,232,229,.9)!important;padding:9px!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-metrics{border-radius:16px!important;box-shadow:0 14px 36px rgba(16,37,76,.10)!important;overflow:hidden!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-category-grid{gap:14px!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-category-card{border-radius:16px!important;box-shadow:0 8px 24px rgba(16,37,76,.055)!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-salary{background:linear-gradient(100deg,#effafa 0%,#f0f8ff 50%,#effafa 100%)!important}
+body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-salary-calculator{border-radius:20px!important;box-shadow:0 16px 42px rgba(16,37,76,.09)!important}
+body.wpbb-jobs-theme .wp-theme-footer-main{background:#fff!important}
+body.wpbb-jobs-theme .wp-theme-footer-newsletter-band{box-shadow:inset 0 1px rgba(255,255,255,.12)}
+html:is(.is-dark-theme,[data-theme="dark"]) body.wpbb-jobs-theme .wp-theme-footer-main{background:#08191d!important}
+@media(max-width:991.98px){body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-hero-shell{min-height:0!important;padding-top:40px!important}body.wpbb-jobs-marketplace-home #wp-theme-main .wpbb-jobs-home-title{font-size:52px!important}}

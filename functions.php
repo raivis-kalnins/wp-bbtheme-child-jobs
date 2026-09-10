@@ -13,6 +13,17 @@ require_once __DIR__ . '/inc/jobs-v85-upgrade.php';
 require_once __DIR__ . '/inc/jobs-v86-finish.php';
 require_once __DIR__ . '/inc/jobs-v87-design.php';
 require_once __DIR__ . '/inc/jobs-v88-finish.php';
+require_once __DIR__ . '/inc/jobs-v89-finish.php';
+require_once __DIR__ . '/inc/jobs-v92-live-fix.php';
+// 3.8.10.94 hotfix: the 3.8.10.93 archive shipped the module as
+// jobs-v93-live-search.php while functions.php referenced jobs-v93-live-fix.php.
+// Load the real module defensively so a missing optional release module can never
+// take the entire WordPress site down during an interrupted/partial update.
+$wpbb_jobs_v93_module = __DIR__ . '/inc/jobs-v93-live-search.php';
+if ( is_readable( $wpbb_jobs_v93_module ) ) {
+    require_once $wpbb_jobs_v93_module;
+}
+unset( $wpbb_jobs_v93_module );
 
 function wpbb_jobs_project_mode( $mode ) {
     return 'jobs';
@@ -114,6 +125,11 @@ add_action( 'enqueue_block_editor_assets', 'wpbb_jobs_enqueue_editor_assets', 16
 
 function wpbb_jobs_body_class( $classes ) {
     $classes[] = 'wpbb-jobs-theme';
+    // The suite finishing layers key their responsive/navigation rules from
+    // this neutral class. Jobs predates that convention, so without it the
+    // injected mobile drawer exists but its responsive CSS never becomes
+    // active at tablet/mobile widths.
+    $classes[] = 'wpbb-sector-premium';
     if ( wpbb_jobs_engine_active() ) $classes[] = 'wpbb-jobs-engine-active';
     return $classes;
 }
@@ -366,3 +382,69 @@ require_once get_stylesheet_directory() . '/inc/jobs-menu-repair-v82.php';
 
 // v3.8.10.81: keep interactive wp-admin saves/updates fast.
 require_once get_stylesheet_directory() . '/inc/admin-performance.php';
+
+// v3.8.10.90 final visual alignment layer.
+function wpbb_jobs_v90_assets() {
+    $path = get_stylesheet_directory() . '/assets/jobs-v90.css';
+    if ( is_readable( $path ) ) wp_enqueue_style( 'wpbb-jobs-v90', get_stylesheet_directory_uri() . '/assets/jobs-v90.css', array(), wp_get_theme()->get( 'Version' ) );
+}
+add_action( 'wp_enqueue_scripts', 'wpbb_jobs_v90_assets', 320 );
+
+
+// v3.8.10.91 live visual correction layer.
+function wpbb_jobs_v91_assets() {
+    $path = get_stylesheet_directory() . '/assets/jobs-v91.css';
+    if ( is_readable( $path ) ) wp_enqueue_style( 'wpbb-jobs-v91', get_stylesheet_directory_uri() . '/assets/jobs-v91.css', array( 'wpbb-jobs-v90' ), wp_get_theme()->get( 'Version' ) );
+}
+add_action( 'wp_enqueue_scripts', 'wpbb_jobs_v91_assets', 330 );
+
+// v3.8.10.95 full Jobs grid + BBuilder hCaptcha finishing pass.
+$wpbb_jobs_v95_module = get_stylesheet_directory() . '/inc/jobs-v95-grid-captcha.php';
+if ( is_readable( $wpbb_jobs_v95_module ) ) {
+    require_once $wpbb_jobs_v95_module;
+}
+unset( $wpbb_jobs_v95_module );
+
+// v3.8.10.96 wide-grid, contact, CTA, captcha and mobile finish.
+$wpbb_jobs_v96_module = get_stylesheet_directory() . '/inc/jobs-v96-finish.php';
+if ( is_readable( $wpbb_jobs_v96_module ) ) {
+    require_once $wpbb_jobs_v96_module;
+}
+unset( $wpbb_jobs_v96_module );
+// v3.8.10.97 final hero quality and mobile navigation layer.
+require_once get_stylesheet_directory() . '/inc/jobs-v97-suite.php';
+
+
+/** 3.8.10.98 submission, legal/article width and mobile navigation finishing layer. */
+function wpbb_jobs_v98_enqueue_assets(){
+    $v = wp_get_theme()->get('Version');
+    wp_enqueue_style('wpbb-jobs-v98', get_stylesheet_directory_uri() . '/assets/jobs-v98.css', array('wpbb-jobs-v97'), $v);
+    wp_enqueue_script('wpbb-jobs-v98', get_stylesheet_directory_uri() . '/assets/jobs-v98.js', array('wpbb-jobs-v97'), $v, true);
+}
+add_action('wp_enqueue_scripts','wpbb_jobs_v98_enqueue_assets',999);
+
+// v3.8.10.99 final grid, hCaptcha/form, contact and mobile finishing layer.
+$wpbb_jobs_v99_module = get_stylesheet_directory() . '/inc/jobs-v99-finish.php';
+if ( is_readable( $wpbb_jobs_v99_module ) ) {
+    require_once $wpbb_jobs_v99_module;
+}
+unset( $wpbb_jobs_v99_module );
+
+// v3.8.11.00 final hero overlap, cookie ownership and mobile navigation fix.
+$wpbb_jobs_v100_module = get_stylesheet_directory() . '/inc/jobs-v100-finish.php';
+if ( is_readable( $wpbb_jobs_v100_module ) ) require_once $wpbb_jobs_v100_module;
+unset( $wpbb_jobs_v100_module );
+
+// v3.8.11.02 mobile menu, legal/contact and single-item correction.
+$wpbb_jobs_v101_module = get_stylesheet_directory() . '/inc/jobs-v101-finish.php';
+if ( is_readable( $wpbb_jobs_v101_module ) ) require_once $wpbb_jobs_v101_module;
+unset( $wpbb_jobs_v101_module );
+
+// v3.8.11.04 deterministic mobile navigation and WooCommerce/alignment finish.
+require_once get_stylesheet_directory() . '/inc/v104-finish.php';
+
+// v3.8.11.05 legal/contact grid, mobile drawer and WooCommerce template finish.
+require_once get_stylesheet_directory() . '/inc/v105-finish.php';
+
+// v3.8.11.07 final search, WooCommerce, Jobs captcha/grid and responsive repair.
+require_once get_stylesheet_directory() . '/inc/v107-finish.php';

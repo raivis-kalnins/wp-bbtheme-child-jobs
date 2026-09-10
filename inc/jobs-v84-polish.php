@@ -10,17 +10,20 @@ if ( ! function_exists( 'wpbb_jobs_v84_contact_page_content' ) ) {
         $hero_inner .= wpbb_child_v62_paragraph( __( 'Tell us whether you are looking for work, hiring, or need account support.', 'wp-bbtheme-child' ), 'wp-theme-sector-lead' );
         $hero = wpbb_child_v62_block( 'group', array( 'className' => 'wp-theme-inner-hero wpbb-jobs-contact-hero' ), '<div class="wp-block-group wp-theme-inner-hero wpbb-jobs-contact-hero">' . wpbb_child_v62_block( 'wpbb/row', array( 'containerClass' => 'container' ), wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12 ), $hero_inner ) ) . '</div>' );
 
-        $cards = array(
-            array( __( 'Email support', 'wp-bbtheme-child' ), (string) ( $c['email'] ?? 'hello@talentbridge.example' ) ),
+        $contact_cards = array(
             array( __( 'Call the team', 'wp-bbtheme-child' ), (string) ( $c['phone'] ?? '+44 20 7946 0280' ) ),
-            array( __( 'Recruitment hub', 'wp-bbtheme-child' ), (string) ( $c['address'] ?? __( 'London, United Kingdom · remote recruitment across the UK', 'wp-bbtheme-child' ) ) ),
+            array( __( 'Email support', 'wp-bbtheme-child' ), (string) ( $c['email'] ?? 'hello@talentbridge.example' ) ),
+            array( __( 'Visit', 'wp-bbtheme-child' ), (string) ( $c['address'] ?? __( 'London, United Kingdom · remote recruitment across the UK', 'wp-bbtheme-child' ) ) ),
             array( __( 'Opening hours', 'wp-bbtheme-child' ), (string) ( $c['hours'] ?? __( 'Mon–Fri · 08:30–18:00', 'wp-bbtheme-child' ) ) ),
         );
-        $method_inner  = wpbb_child_v62_paragraph( __( 'Contact the recruitment team', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
-        $method_inner .= wpbb_child_v62_heading( __( 'Talk to the right person and get a useful response.', 'wp-bbtheme-child' ), 2 );
-        $method_inner .= wpbb_child_v62_paragraph( __( 'Tell us whether you are looking for work, hiring, or need account support.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
-        $method_inner .= wpbb_child_v62_cards_row( $cards, 'wpbb-jobs-contact-method', 4 );
-        $methods = wpbb_child_v67_section( 'wpbb-jobs-contact-methods', $method_inner );
+        $method_cards = '';
+        foreach ( $contact_cards as $index => $item ) {
+            $method_cards .= wpbb_child_v62_icon_card( (string) $item[0], (string) $item[1], 'wpbb-jobs-contact-method wpbb-jobs-contact-method--' . ( $index + 1 ) );
+        }
+        $left  = wpbb_child_v62_paragraph( __( 'Contact details', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
+        $left .= wpbb_child_v62_heading( __( 'Talk to the right person and get a useful response.', 'wp-bbtheme-child' ), 2 );
+        $left .= wpbb_child_v62_paragraph( __( 'Tell us whether you are looking for work, hiring, or need account support.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
+        $left .= wpbb_child_v62_block( 'group', array( 'className' => 'wpbb-jobs-contact-method-list' ), '<div class="wp-block-group wpbb-jobs-contact-method-list">' . $method_cards . '</div>' );
 
         $fields = array(
             array( 'type' => 'text', 'name' => 'name', 'label' => __( 'Name', 'wp-theme' ), 'required' => true, 'width' => 6, 'breakpoint' => 'md', 'placeholder' => __( 'Your name', 'wp-theme' ), 'step' => 1 ),
@@ -31,7 +34,7 @@ if ( ! function_exists( 'wpbb_jobs_v84_contact_page_content' ) ) {
         );
         $form = wpbb_child_v62_block( 'wpbb/dynamic-form', array(
             'showTitle' => true,
-            'formTitle' => __( 'Send a recruitment enquiry', 'wp-bbtheme-child' ),
+            'formTitle' => __( 'Send us a message', 'wp-bbtheme-child' ),
             'emailSubject' => __( 'TalentBridge recruitment enquiry', 'wp-bbtheme-child' ),
             'stylePreset' => 'soft',
             'labelPosition' => 'top',
@@ -39,13 +42,19 @@ if ( ! function_exists( 'wpbb_jobs_v84_contact_page_content' ) ) {
             'fields' => $fields,
             'className' => 'wp-theme-contact-form wpbb-jobs-contact-form',
         ), '', true );
-        $form_inner  = wpbb_child_v62_paragraph( __( 'Send a recruitment enquiry', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
-        $form_inner .= wpbb_child_v62_heading( __( 'Tell us what you need help with.', 'wp-bbtheme-child' ), 2 );
-        $form_inner .= wpbb_child_v62_paragraph( __( 'A clear message helps us route candidate, employer and account questions to the right place.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
-        $form_inner .= $form;
-        $form_section = wpbb_child_v67_section( 'wpbb-jobs-contact-form-section', $form_inner );
 
-        return $hero . $methods . $form_section;
+        $right  = wpbb_child_v62_paragraph( __( 'Send a recruitment enquiry', 'wp-bbtheme-child' ), 'wp-theme-sector-eyebrow' );
+        $right .= wpbb_child_v62_heading( __( 'Tell us what you need help with.', 'wp-bbtheme-child' ), 2 );
+        $right .= wpbb_child_v62_paragraph( __( 'A clear message helps us route candidate, employer and account questions to the right place.', 'wp-bbtheme-child' ), 'wpbb-jobs-section-intro' );
+        $right .= $form;
+
+        $row = wpbb_child_v62_block( 'wpbb/row', array( 'customClasses' => 'wpbb-jobs-contact-main-row', 'gutterX' => 'gx-5', 'gutterY' => 'gy-5' ),
+            wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 5, 'customClasses' => 'wpbb-jobs-contact-details-col' ), $left )
+            . wpbb_child_v62_block( 'wpbb/column', array( 'xs' => 12, 'lg' => 7, 'customClasses' => 'wpbb-jobs-contact-form-col' ), $right )
+        );
+        $main = wpbb_child_v67_section( 'wpbb-jobs-contact-main', $row );
+
+        return $hero . $main;
     }
 }
 
