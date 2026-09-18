@@ -133,6 +133,11 @@
       try { window.hcaptcha.reset(id); } catch (e) {}
     }
     setToken(form, '');
+    if (form) {
+      delete form.dataset.wpbbJobsCaptchaVerified;
+      delete form.dataset.wpbbJobsCaptchaPendingSubmit;
+      delete form.dataset.wpbbJobsSubmitting;
+    }
   }
 
   function closeModal(form, cancelled) {
@@ -168,15 +173,26 @@
           inlineStatus(form, '');
           if (captchaMode(form) !== 'inline') closeModal(form, false);
           form.dataset.wpbbJobsCaptchaVerified = '1';
-          if (typeof form.requestSubmit === 'function') {
-            form.dataset.wpbbJobsCaptchaBypass = '1';
-            form.requestSubmit();
-          } else {
-            window.HTMLFormElement.prototype.submit.call(form);
+
+          /*
+           * Inline hCaptcha is visible before the user presses the form button.
+           * Do not auto-submit merely because the checkbox was completed: that
+           * used to race the user's own Save click and send the same one-time
+           * hCaptcha token twice, producing invalid/already-seen failures.
+           * Only continue automatically when this challenge was opened by an
+           * actual submit attempt that we previously paused.
+           */
+          if (form.dataset.wpbbJobsCaptchaPendingSubmit === '1') {
+            delete form.dataset.wpbbJobsCaptchaPendingSubmit;
+            window.setTimeout(function () {
+              if (typeof form.requestSubmit === 'function') form.requestSubmit();
+              else window.HTMLFormElement.prototype.submit.call(form);
+            }, 0);
           }
         },
         'error-callback': function () {
           setToken(form, '');
+          delete form.dataset.wpbbJobsCaptchaVerified;
           status(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
           inlineStatus(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
         },
@@ -192,6 +208,29 @@
     } catch (e) {
       return false;
     }
+  }
+
+  function waitForInlineCaptcha(form, attempt) {
+    attempt = attempt || 0;
+    if (!form || captchaMode(form) !== 'inline') return;
+
+    if (render(form)) {
+      inlineStatus(
+        form,
+        form.dataset.wpbbJobsCaptchaPendingSubmit === '1'
+          ? (cfg.captchaError || 'Please complete the hCaptcha verification.')
+          : ''
+      );
+      return;
+    }
+
+    if (attempt >= 40) {
+      inlineStatus(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
+      return;
+    }
+
+    inlineStatus(form, cfg.captchaWait || 'Loading verification…');
+    window.setTimeout(function () { waitForInlineCaptcha(form, attempt + 1); }, 250);
   }
 
   function waitForCaptcha(form, attempt) {
@@ -212,13 +251,29 @@
   function onSubmit(event) {
     var form = event.target;
     if (!cfg.captcha || !form || !form.matches('form[data-wpbb-jobs-public-form="1"]')) return;
-    if (form.dataset.wpbbJobsCaptchaBypass === '1') { delete form.dataset.wpbbJobsCaptchaBypass; return; }
-    if (form.dataset.wpbbJobsCaptchaVerified === '1' || (tokenInput(form) && tokenInput(form).value)) return;
+
+    /* Block accidental double-clicks while a verified token is being posted. */
+    if (form.dataset.wpbbJobsSubmitting === '1') {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    var input = tokenInput(form);
+    if (form.dataset.wpbbJobsCaptchaVerified === '1' || (input && input.value)) {
+      delete form.dataset.wpbbJobsCaptchaPendingSubmit;
+      form.dataset.wpbbJobsSubmitting = '1';
+      /* If navigation is prevented elsewhere, let the user retry after a short guard. */
+      window.setTimeout(function () { delete form.dataset.wpbbJobsSubmitting; }, 8000);
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
+    form.dataset.wpbbJobsCaptchaPendingSubmit = '1';
+
     if (captchaMode(form) === 'inline') {
-      render(form);
-      inlineStatus(form, cfg.captchaError || 'Please complete the hCaptcha verification.');
+      waitForInlineCaptcha(form, 0);
       var host = formHost(form);
       if (host && typeof host.scrollIntoView === 'function') host.scrollIntoView({behavior:'smooth', block:'center'});
       return;
@@ -229,7 +284,10 @@
   function init() {
     replaceBranding();
     document.querySelectorAll('form[data-wpbb-jobs-public-form="1"]').forEach(function (form) {
-      if (captchaMode(form) === 'inline') render(form);
+      /* The shared API may be async (for example Newsletter Campaigns uses an
+       * onload callback). Retry inline rendering until window.hcaptcha exists
+       * instead of losing the widget when DOMContentLoaded wins that race. */
+      if (captchaMode(form) === 'inline') waitForInlineCaptcha(form, 0);
       else modalFor(form);
     });
   }

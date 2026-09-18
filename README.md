@@ -1,3 +1,18 @@
+## 3.8.11.30 Guest application and manifest repair
+- The job-detail hero no longer has a duplicate Apply now action; the real **Send application** button is directly after the legal consent and hCaptcha inside the application form.
+- Guest applications remain supported when HR Jobs → Settings → **Allow visitors to quick-apply without creating a candidate account** is enabled, with an optional sign-in/register route shown to visitors.
+- When guest applications are disabled, visitors get a clear sign-in/register gate instead of a dead application action.
+- Guest confirmation text no longer refers to a candidate dashboard.
+- `/?wpbb-pwa=manifest` now returns valid manifest JSON from the child theme on installs where the parent route previously fell through to HTML.
+- `recaptchacompat disabled` in the console is informational output from the shared hCaptcha API loader and does not indicate a failed captcha.
+
+## 3.8.11.29 Jobs consent and hCaptcha reliability
+- Required Privacy Policy / Terms & Conditions acceptance checkboxes are now present on Jobs account registration, company profile and candidate profile forms, with server-side enforcement.
+- Inline hCaptcha no longer auto-submits simply when the challenge is completed; it only resumes a submit that was actually waiting for verification, preventing one-time tokens from being sent twice.
+- Jobs reuses a previously registered BBuilder/Newsletter hCaptcha API handle where available, reducing duplicate API/widget lifecycles.
+- Generic parent form notices are suppressed when an explicit required Jobs consent checkbox is already present.
+- Employer and candidate flows share the same corrected captcha lifecycle.
+
 ## 3.8.11.16 reset-safe final release fixes
 - Demo reset/import now re-runs the canonical managed BBuilder page rebuild and all v116 repairs automatically.
 - The old migration that removed legitimate responsive BBuilder column widths is disabled; desktop multi-column layouts survive a clean demo reset.

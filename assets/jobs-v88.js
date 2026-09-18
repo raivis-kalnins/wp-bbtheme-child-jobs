@@ -50,8 +50,14 @@
 
     document.querySelectorAll('form.wpbb-jobs-form').forEach(function (form) {
       var button = form.querySelector('button[type="submit"],input[type="submit"]');
+      var hasRequiredConsent = !!form.querySelector('.wpbb-jobs-consent input[type="checkbox"][required]');
       Array.prototype.slice.call(form.children).forEach(function (child) {
         if (!childTextMatchesNotice(child)) return;
+        if (hasRequiredConsent) {
+          child.classList.add('wpbb-jobs-redundant-form-notice');
+          child.classList.remove('wpbb-jobs-legal-notice');
+          return;
+        }
         child.classList.add('wpbb-jobs-legal-notice');
         if (button && child.nextElementSibling !== button) form.insertBefore(child, button);
       });

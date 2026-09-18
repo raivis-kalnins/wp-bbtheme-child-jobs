@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.8.11.30
+- Moves the single-job submission action into the application form after the Privacy/Terms consent and hCaptcha, and removes the duplicate hero-level **Apply now** CTA.
+- Forces the **Send application** button to remain visible and clickable after hCaptcha despite older captcha zero-height/overflow compatibility layers.
+- Makes the anonymous path explicit: when guest applications are enabled, visitors can apply without an account and are offered an optional sign-in/register link; when guest applications are disabled, the form becomes a clear sign-in/register gate.
+- Corrects guest success and confirmation-email wording so anonymous applicants are not told to use a candidate dashboard they do not have.
+- Repairs `/?wpbb-pwa=manifest` in the child theme so it returns valid `application/manifest+json` instead of HTML, removing the browser manifest parse error on affected cloned installs.
+- The hCaptcha console message `recaptchacompat disabled` is left unchanged because it is an informational message emitted by the shared Newsletter Campaigns hCaptcha loader, not a verification failure.
+
+## 3.8.11.29
+- Fixes Jobs hCaptcha double submission: completing an inline challenge no longer submits a form unless a submit attempt is already waiting for verification, and rapid repeat submits are guarded so the same one-time hCaptcha token is not posted twice.
+- Reuses an hCaptcha API script already registered by WP BBuilder/Newsletter Campaigns instead of loading a second API instance under another WordPress handle.
+- Adds required, linked Privacy Policy / Terms & Conditions consent checkboxes to account registration, company profile create/edit and candidate profile create/edit, with matching server-side validation.
+- Keeps job-posting and application consent required and normalises them onto the same linked consent component.
+- Hides the parent generic “By submitting this form…” notice when a Jobs form already contains an explicit required consent checkbox, avoiding duplicate legal UI.
+- The hCaptcha fix applies to employer and candidate public Jobs forms, including new employer/company setup, company edits, candidate profile edits and applications.
+
 ## 3.8.10.88
 - Fixes the literal `\\n` text appearing before the site header by correcting the Jobs favicon `<head>` output.
 - Widens header, homepage sections, newsletter and footer to a consistent 1400px desktop Jobs canvas, removing the excessive empty gutters visible on the live site.

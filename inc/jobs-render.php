@@ -258,6 +258,27 @@ function wpbb_jobs_resumes_list( $atts = array() ) {
     return ob_get_clean();
 }
 
+/**
+ * Shared required privacy/terms consent used by Jobs account/profile forms.
+ * Keep the legal URLs resolved at render time so cloned/demo domains never
+ * carry stale absolute links from the source install.
+ */
+function wpbb_jobs_legal_consent_html( $field_name, $message ) {
+    $privacy_url = get_privacy_policy_url();
+    if ( ! $privacy_url ) $privacy_url = home_url( '/privacy-policy/' );
+
+    $terms_url = home_url( '/terms-and-conditions/' );
+    $terms_page = get_page_by_path( 'terms-and-conditions' );
+    if ( $terms_page instanceof WP_Post ) $terms_url = get_permalink( $terms_page );
+
+    return '<label class="wpbb-jobs-check wpbb-jobs-consent">'
+        . '<input type="checkbox" name="' . esc_attr( $field_name ) . '" value="1" required aria-required="true" />'
+        . '<span>' . wp_kses(
+            sprintf( $message, esc_url( $privacy_url ), esc_url( $terms_url ) ),
+            array( 'a' => array( 'href' => true, 'target' => true, 'rel' => true ) )
+        ) . '</span></label>';
+}
+
 function wpbb_jobs_registration_form() {
     if ( is_user_logged_in() ) {
         $url = wpbb_jobs_is_employer() ? wpbb_jobs_page_url( 'employer-dashboard' ) : wpbb_jobs_page_url( 'candidate-dashboard' );
@@ -276,6 +297,7 @@ function wpbb_jobs_registration_form() {
                 <label><?php esc_html_e( 'Name', 'wp-bbtheme-child' ); ?><input name="name" required /></label>
                 <label><?php esc_html_e( 'Email', 'wp-bbtheme-child' ); ?><input type="email" name="email" required /></label>
                 <label><?php esc_html_e( 'Password', 'wp-bbtheme-child' ); ?><input type="password" name="password" minlength="8" required autocomplete="new-password" /></label>
+                <?php echo wpbb_jobs_legal_consent_html( 'account_terms_consent', __( 'I accept the <a href="%1$s" target="_blank" rel="noopener">Privacy Policy</a> and <a href="%2$s" target="_blank" rel="noopener">Terms & Conditions</a>.', 'wp-bbtheme-child' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 <?php if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'registration' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Create account', 'wp-bbtheme-child' ); ?></button>
             </form>
@@ -323,6 +345,7 @@ function wpbb_jobs_company_form( $company_id = 0 ) {
             <label><?php esc_html_e( 'Phone', 'wp-bbtheme-child' ); ?><input name="company_phone" value="<?php echo esc_attr( $company ? get_post_meta( $company->ID, '_wpbb_company_phone', true ) : '' ); ?>" /></label>
             <label><?php esc_html_e( 'Location', 'wp-bbtheme-child' ); ?><select name="company_location"><option value=""><?php esc_html_e( 'Choose location', 'wp-bbtheme-child' ); ?></option><?php foreach ( $locations as $term ) : ?><option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $location_id, $term->term_id ); ?>><?php echo esc_html( function_exists( 'wpbb_jobs_translate_text' ) ? wpbb_jobs_translate_text( $term->name ) : $term->name ); ?></option><?php endforeach; ?></select></label>
         </div>
+        <?php echo wpbb_jobs_legal_consent_html( 'company_terms_consent', __( 'I confirm I am authorised to provide this company information and I accept the <a href="%1$s" target="_blank" rel="noopener">Privacy Policy</a> and <a href="%2$s" target="_blank" rel="noopener">Terms & Conditions</a>.', 'wp-bbtheme-child' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'company-profile' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Save company', 'wp-bbtheme-child' ); ?></button>
     </form><?php
@@ -360,7 +383,7 @@ function wpbb_jobs_job_form( $job_id = 0 ) {
         <label class="wpbb-jobs-check"><input type="checkbox" name="remote" value="1" <?php checked( $job ? get_post_meta( $job->ID, '_wpbb_job_remote', true ) : false ); ?> /> <?php esc_html_e( 'Remote or hybrid working is available', 'wp-bbtheme-child' ); ?></label>
         <label><?php esc_html_e( 'Short summary', 'wp-bbtheme-child' ); ?><textarea name="job_excerpt" rows="3"><?php echo esc_textarea( $job ? $job->post_excerpt : '' ); ?></textarea></label>
         <label><?php esc_html_e( 'Job description', 'wp-bbtheme-child' ); ?><textarea name="job_description" rows="12" required><?php echo esc_textarea( $job ? $job->post_content : '' ); ?></textarea></label>
-        <label class="wpbb-jobs-check wpbb-jobs-consent"><input type="checkbox" name="job_terms_consent" value="1" required aria-required="true" /> <span><?php esc_html_e( 'I confirm that this vacancy information is accurate and I agree to the Terms & Conditions and Privacy Policy.', 'wp-bbtheme-child' ); ?></span></label>
+        <?php echo wpbb_jobs_legal_consent_html( 'job_terms_consent', __( 'I confirm that this vacancy information is accurate and I accept the <a href="%1$s" target="_blank" rel="noopener">Privacy Policy</a> and <a href="%2$s" target="_blank" rel="noopener">Terms & Conditions</a>.', 'wp-bbtheme-child' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'job-editor' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <button class="wpbb-jobs-button" type="submit"><?php echo esc_html( wpbb_jobs_setting( 'job_approval', 1 ) && ! wpbb_jobs_is_admin_user() ? __( 'Submit job for review', 'wp-bbtheme-child' ) : __( 'Publish job', 'wp-bbtheme-child' ) ); ?></button>
     </form><?php
@@ -408,6 +431,7 @@ function wpbb_jobs_resume_form() {
             <label><?php esc_html_e( 'Education', 'wp-bbtheme-child' ); ?><textarea name="education" rows="5"><?php echo esc_textarea( $resume ? get_post_meta( $resume->ID, '_wpbb_resume_education', true ) : '' ); ?></textarea></label>
             <label><?php esc_html_e( 'CV file (PDF, DOC or DOCX)', 'wp-bbtheme-child' ); ?><input type="file" name="resume_file" accept=".pdf,.doc,.docx" /><small><?php esc_html_e( 'The original CV stays securely attached to your profile. Structured fields above remain editable and reusable.', 'wp-bbtheme-child' ); ?></small></label>
         </fieldset>
+        <?php echo wpbb_jobs_legal_consent_html( 'candidate_terms_consent', __( 'I agree that my candidate profile and CV may be stored and shared with employers as described in the <a href="%1$s" target="_blank" rel="noopener">Privacy Policy</a>, and I accept the <a href="%2$s" target="_blank" rel="noopener">Terms & Conditions</a>.', 'wp-bbtheme-child' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( 'cv-builder' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <div class="wpbb-jobs-cv-builder__actions"><button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Save candidate profile', 'wp-bbtheme-child' ); ?></button><?php if ( function_exists( 'wpbb_jobs_linkedin_button_html' ) && ! get_user_meta( $user->ID, '_wpbb_linkedin_sub', true ) ) echo wpbb_jobs_linkedin_button_html( wpbb_jobs_page_url( 'create-resume' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
     </form><?php
@@ -416,9 +440,12 @@ function wpbb_jobs_resume_form() {
 
 function wpbb_jobs_apply_form( $job_id ) {
     if ( ! wpbb_jobs_job_is_open( $job_id ) ) return '<div class="wpbb-jobs-empty">' . esc_html__( 'Applications for this role are closed.', 'wp-bbtheme-child' ) . '</div>';
-    $logged_in = is_user_logged_in();
+    $logged_in  = is_user_logged_in();
+    $guest_apply = (bool) wpbb_jobs_setting( 'guest_apply', 1 );
     if ( $logged_in && ! wpbb_jobs_is_candidate() ) return '<div class="wpbb-jobs-gate">' . esc_html__( 'Applications must be submitted from a candidate account.', 'wp-bbtheme-child' ) . '</div>';
-    if ( ! $logged_in && ! wpbb_jobs_setting( 'guest_apply', 1 ) ) return '<div class="wpbb-jobs-gate"><p>' . esc_html__( 'Create a candidate account to apply.', 'wp-bbtheme-child' ) . '</p><a class="wpbb-jobs-button" href="' . esc_url( wpbb_jobs_page_url( 'login-register' ) ) . '">' . esc_html__( 'Create account / sign in', 'wp-bbtheme-child' ) . '</a></div>';
+    if ( ! $logged_in && ! $guest_apply ) {
+        return '<div class="wpbb-jobs-gate wpbb-jobs-apply-gate"><h2>' . esc_html__( 'Ready to apply?', 'wp-bbtheme-child' ) . '</h2><p>' . esc_html__( 'Sign in or create a candidate account to submit this application.', 'wp-bbtheme-child' ) . '</p><a class="wpbb-jobs-button" href="' . esc_url( wpbb_jobs_page_url( 'login-register' ) ) . '">' . esc_html__( 'Sign in / register', 'wp-bbtheme-child' ) . '</a></div>';
+    }
     $resume = $logged_in ? wpbb_jobs_get_user_resume() : null;
     ob_start(); echo wpbb_jobs_front_notice_html(); ?>
     <form class="wpbb-jobs-form wpbb-jobs-apply wpbb-jobs-panel" data-wpbb-jobs-public-form="1" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -426,27 +453,19 @@ function wpbb_jobs_apply_form( $job_id ) {
         <?php wp_nonce_field( 'wpbb_jobs_apply_' . $job_id, 'wpbb_jobs_nonce' ); ?>
         <h2><?php esc_html_e( 'Apply for this job', 'wp-bbtheme-child' ); ?></h2>
         <?php if ( $logged_in ) : ?><p class="wpbb-jobs-form__hint"><?php echo esc_html( $resume ? __( 'Your saved candidate profile will be attached to this application.', 'wp-bbtheme-child' ) : __( 'You can apply now and create a fuller candidate profile afterwards.', 'wp-bbtheme-child' ) ); ?></p><?php endif; ?>
-        <?php if ( ! $logged_in ) : ?><div class="wpbb-jobs-form__grid"><label><?php esc_html_e( 'Name', 'wp-bbtheme-child' ); ?><input name="applicant_name" required /></label><label><?php esc_html_e( 'Email', 'wp-bbtheme-child' ); ?><input type="email" name="applicant_email" required /></label></div><?php endif; ?>
+        <?php if ( ! $logged_in ) : ?>
+            <div class="wpbb-jobs-guest-choice">
+                <strong><?php esc_html_e( 'Apply without an account', 'wp-bbtheme-child' ); ?></strong>
+                <span><?php esc_html_e( 'You can send this application as a guest.', 'wp-bbtheme-child' ); ?> <a href="<?php echo esc_url( wpbb_jobs_page_url( 'login-register' ) ); ?>"><?php esc_html_e( 'Sign in or register', 'wp-bbtheme-child' ); ?></a> <?php esc_html_e( 'if you want to save a candidate profile and track applications.', 'wp-bbtheme-child' ); ?></span>
+            </div>
+            <div class="wpbb-jobs-form__grid"><label><?php esc_html_e( 'Name', 'wp-bbtheme-child' ); ?><input name="applicant_name" required /></label><label><?php esc_html_e( 'Email', 'wp-bbtheme-child' ); ?><input type="email" name="applicant_email" required /></label></div>
+        <?php endif; ?>
         <label><?php esc_html_e( 'Phone', 'wp-bbtheme-child' ); ?><input name="applicant_phone" /></label>
         <label><?php esc_html_e( 'Message to the hiring team', 'wp-bbtheme-child' ); ?><textarea name="application_message" rows="6"></textarea></label>
         <label><?php echo esc_html( $resume ? __( 'Replace attached CV for this application (optional)', 'wp-bbtheme-child' ) : __( 'CV file (PDF, DOC or DOCX)', 'wp-bbtheme-child' ) ); ?><input type="file" name="cv_file" accept=".pdf,.doc,.docx" /></label>
+        <?php echo wpbb_jobs_legal_consent_html( 'application_terms_consent', __( 'I agree that my application details and CV may be used to process this job application, and I accept the <a href="%1$s" target="_blank" rel="noopener">Privacy Policy</a> and <a href="%2$s" target="_blank" rel="noopener">Terms & Conditions</a>.', 'wp-bbtheme-child' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php if ( function_exists( 'wpbb_jobs_v86_public_hcaptcha_html' ) ) echo wpbb_jobs_v86_public_hcaptcha_html( $logged_in ? 'candidate-application' : 'guest-application' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-        <?php
-        $privacy_url = get_privacy_policy_url();
-        if ( ! $privacy_url ) $privacy_url = home_url( '/privacy-policy/' );
-        $terms_url = home_url( '/terms-and-conditions/' );
-        $terms_page = get_page_by_path( 'terms-and-conditions' );
-        if ( $terms_page instanceof WP_Post ) $terms_url = get_permalink( $terms_page );
-        ?>
-        <label class="wpbb-jobs-check wpbb-jobs-consent wpbb-jobs-application-consent">
-            <input type="checkbox" name="application_terms_consent" value="1" required aria-required="true" />
-            <span><?php echo wp_kses( sprintf(
-                __( 'I agree that my application details and CV may be used to process this job application, and I accept the <a href="%1$s" target="_blank" rel="noopener">Privacy Policy</a> and <a href="%2$s" target="_blank" rel="noopener">Terms & Conditions</a>.', 'wp-bbtheme-child' ),
-                esc_url( $privacy_url ),
-                esc_url( $terms_url )
-            ), array( 'a' => array( 'href' => true, 'target' => true, 'rel' => true ) ) ); ?></span>
-        </label>
-        <button class="wpbb-jobs-button" type="submit"><?php esc_html_e( 'Send application', 'wp-bbtheme-child' ); ?></button>
+        <div class="wpbb-jobs-apply__actions"><button class="wpbb-jobs-button wpbb-jobs-apply__submit" type="submit"><?php esc_html_e( 'Send application', 'wp-bbtheme-child' ); ?></button></div>
     </form><?php
     return ob_get_clean();
 }
@@ -608,7 +627,6 @@ function wpbb_jobs_single_job_view( $job_id = 0 ) {
                         <h1><?php echo esc_html( function_exists( 'wpbb_jobs_localized_post_title' ) ? wpbb_jobs_localized_post_title( $job ) : get_the_title( $job_id ) ); ?></h1>
                         <p class="wp-theme-sector-lead"><?php $lead = function_exists( 'wpbb_jobs_localized_post_excerpt' ) ? wpbb_jobs_localized_post_excerpt( $job ) : $job->post_excerpt; echo esc_html( $lead ?: sprintf( __( 'Explore this opportunity with %s.', 'wp-bbtheme-child' ), $company instanceof WP_Post ? $company->post_title : get_bloginfo( 'name' ) ) ); ?></p>
                     </div>
-                    <a class="wpbb-jobs-button wpbb-jobs-single-hero__apply" href="#apply"><?php esc_html_e( 'Apply now', 'wp-bbtheme-child' ); ?></a>
                 </div>
             </div>
         </section>

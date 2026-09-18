@@ -512,3 +512,6 @@ require_once get_stylesheet_directory() . '/inc/v127-final.php';
 
 // v3.8.11.28 final live component recovery: commerce grids, cart/checkout, process cards and stable hero media/pagination.
 require_once get_stylesheet_directory() . '/inc/v128-final.php';
+
+// v3.8.11.30 Jobs application CTA, guest flow and PWA manifest repair.
+require_once get_stylesheet_directory() . '/inc/jobs-v130-finish.php';

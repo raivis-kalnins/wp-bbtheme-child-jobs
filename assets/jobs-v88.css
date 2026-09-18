@@ -218,6 +218,7 @@ body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-legal-notice{
   background:#f7fbfa!important;color:#617589!important;font-size:11.5px!important;line-height:1.5!important;
 }
 body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-legal-notice a{color:#08765c!important;font-weight:700}
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-redundant-form-notice{display:none!important}
 body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-public-captcha{position:relative!important;height:0!important;min-height:0!important;margin:0!important;overflow:hidden!important}
 body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply>.wpbb-jobs-button{justify-self:start;min-width:160px}
 

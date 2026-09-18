@@ -1,0 +1,84 @@
+/* Jobs 3.8.11.30 — single-job application CTA + guest-flow hardening. */
+
+/* The real action lives after consent + hCaptcha. Keep the old hero duplicate
+   hidden as a cache-safe fallback for markup generated before this release. */
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-single-hero__apply{
+  display:none!important;
+}
+
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply{
+  overflow:visible!important;
+}
+
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-guest-choice{
+  display:grid!important;
+  gap:4px!important;
+  width:100%!important;
+  margin:0 0 2px!important;
+  padding:12px 14px!important;
+  border:1px solid #dce9e5!important;
+  border-radius:11px!important;
+  background:#f7fbfa!important;
+  color:#526b80!important;
+  font-size:12.5px!important;
+  line-height:1.5!important;
+}
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-guest-choice strong{
+  color:#10254c!important;
+  font-size:13px!important;
+}
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-guest-choice a{
+  color:#078f6a!important;
+  font-weight:750!important;
+}
+
+/* Several older finishing layers changed captcha height/overflow. Force the
+   form action back into normal document flow immediately after the captcha. */
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply>.wpbb-jobs-apply__actions{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  z-index:1!important;
+  clear:both!important;
+  width:100%!important;
+  min-height:48px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+}
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply__actions>.wpbb-jobs-apply__submit{
+  display:inline-flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  inset:auto!important;
+  width:auto!important;
+  min-width:160px!important;
+  min-height:48px!important;
+  margin:0!important;
+  pointer-events:auto!important;
+}
+
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply-gate{
+  display:grid!important;
+  gap:12px!important;
+}
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply-gate h2,
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply-gate p{
+  margin:0!important;
+}
+body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-apply-gate .wpbb-jobs-button{
+  justify-self:start!important;
+}
+
+html:is(.is-dark-theme,[data-theme=dark]) body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-guest-choice{
+  border-color:#31504c!important;
+  background:#0b211f!important;
+  color:#c8d8d5!important;
+}
+html:is(.is-dark-theme,[data-theme=dark]) body.wpbb-jobs-theme #wp-theme-main .wpbb-jobs-guest-choice strong{
+  color:#f2fbf8!important;
+}

@@ -133,6 +133,23 @@ function wpbb_jobs_v86_newsletter_gettext( $translation, $text, $domain ) {
 add_filter( 'gettext', 'wpbb_jobs_v86_newsletter_gettext', 30, 3 );
 
 
+/**
+ * Reuse any hCaptcha API handle already registered by BBuilder/newsletter.
+ * Loading the hCaptcha API twice under different WordPress handles can create
+ * duplicate widget lifecycles and one-time response tokens that are submitted
+ * more than once. Match by source URL instead of assuming a specific handle.
+ */
+function wpbb_jobs_v86_existing_hcaptcha_handle() {
+    $scripts = wp_scripts();
+    if ( ! $scripts || empty( $scripts->registered ) ) return '';
+
+    foreach ( $scripts->registered as $handle => $registered ) {
+        $src = isset( $registered->src ) ? (string) $registered->src : '';
+        if ( false !== strpos( $src, 'js.hcaptcha.com/1/api.js' ) ) return (string) $handle;
+    }
+    return '';
+}
+
 function wpbb_jobs_v86_enqueue_assets() {
     $version = wp_get_theme()->get( 'Version' );
     wp_enqueue_style(
@@ -145,17 +162,21 @@ function wpbb_jobs_v86_enqueue_assets() {
     $config = wpbb_jobs_v86_hcaptcha_config();
     $deps = array();
     if ( ! empty( $config['enabled'] ) ) {
-        if ( ! wp_script_is( 'hcaptcha-api', 'registered' ) ) {
-            wp_register_script(
-                'hcaptcha-api',
-                'https://js.hcaptcha.com/1/api.js?render=explicit&recaptchacompat=off',
-                array(),
-                null,
-                true
-            );
+        $captcha_handle = wpbb_jobs_v86_existing_hcaptcha_handle();
+        if ( ! $captcha_handle ) {
+            $captcha_handle = 'hcaptcha-api';
+            if ( ! wp_script_is( $captcha_handle, 'registered' ) ) {
+                wp_register_script(
+                    $captcha_handle,
+                    'https://js.hcaptcha.com/1/api.js?render=explicit&recaptchacompat=off',
+                    array(),
+                    null,
+                    true
+                );
+            }
         }
-        wp_enqueue_script( 'hcaptcha-api' );
-        $deps[] = 'hcaptcha-api';
+        wp_enqueue_script( $captcha_handle );
+        $deps[] = $captcha_handle;
     }
 
     wp_enqueue_script(
